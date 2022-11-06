@@ -1,0 +1,86 @@
+{% extends "document/base_document.html" %}
+{% load static %}
+{% load i18n %}
+{% load document_tags %}
+
+{% block page_title %}
+
+{% endblock %}
+
+{% block breadcrumb %}
+{% endblock %}
+
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="card" id="card" data-mode="general" data-ocr="google">
+        <div class="card-header">
+            <h3 class="card-title">{% trans "Document detail" %}</h3>
+
+            <div class="card-tools">
+<!--                <button-->
+<!--                        type="button"-->
+<!--                        class="btn btn-tool"-->
+<!--                        data-action="link-show"-->
+<!--                        data-backdrop="false"-->
+<!--                        data-toggle="modal"-->
+<!--                        data-target="#linksModal"-->
+<!--                        title="Связанные документы"-->
+<!--                ><i class="fas fa-link"></i>-->
+<!--                </button>-->
+                <a href="{% url 'convert_nlp_table_to_nlp_result_url' %}" target="_blank" class="btn btn-tool">
+                    <i class="fas fa-sync"></i>
+                </a>
+
+                <div class="form-group btn-group btn-group-toggle mb-0 mr-1" data-action="ocr-choose" data-toggle="buttons">
+                    <label class="btn btn-secondary active js-tool" type="radio" data-action="google-show"
+                           name="options" title="Google OCR">
+                        <input type="radio" name="options" checked="true" data-action="google-show">
+                        <i class="fas">G</i>
+                    </label>
+                    <label class="btn btn-secondary js-tool" type="radio" data-action="tesseract-show"
+                           name="options" title="Tesseract OCR">
+                        <input type="radio" name="options" data-action="tesseract-show">
+                        <i class="fas fa-cubes"></i>
+                    </label>
+                </div>
+
+                <button type="button" class="btn btn-secondary js-tool" data-action="ocr-show"><i class="fas fa-square"></i>
+                </button>
+                <button type="button" class="btn btn-secondary js-tool" data-action="ocr-edit"><i class="fas fa-edit"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div id="card-body" style="max-height: calc(100vh - 7rem - 116px);" data-mode="general" data-ocr="google">
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.card-body -->
+
+        <!-- /.footer -->
+        <div id="modals"></div>
+        <div class="canvas-tooltip" id="canvas-tooltip"></div>
+        <div class="canvas-remarker row" id="canvas-remarker">
+            <div class="remarker-origin"></div>
+            <input class="remarker-change"></input>
+            <button type="submit" class="remarker-send send"><i class="fas fa-paper-plane"></i></button>
+            <button type="reset" class="remarker-remove remove"><i class="fas fa-trash"></i></button>
+        </div>
+        <div class="canvas-chart-toolbar" id="canvas-chart-toolbar">
+            <a href="#" class="edit" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-pen"></i></a>
+            <a download href="" class="download" target="_blank"><i class="fas fa-download"></i></a>
+        </div>
+    </div>
+    <!-- /.card -->
+
+{% endblock %}
+
+{% block script %}
+
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{
+  "document_id": 3,
+  "document_type_id": 2,
+  "attributes": [
+    {
+      "attribute_link_id": 1,
+      "attribute_id": 26,
+      "attribute_link_name": "Номер",
+      "link_documents": [
+        {
+          "document_id": 2,
+          "document_name": "6. Поликарпова ул.,д.2 корп.4 изм.pdf",
+          "document_path": "files/2020/12/2/2.pdf"
+        },
+        {
+          "document_id": 13,
+          "document_name": "M-03-040506 исправленное.pdf",
+          "document_path": "files/2020/12/3/13_x8Z5ZJY.pdf"
+        }
+      ]
+    },
+    {
+      "attribute_link_id": 4,
+      "attribute_id": 65,
+      "attribute_link_name": "Кадастровый номер",
+      "link_documents": [
+        {
+          "document_id": 4,
+          "document_name": "6. Поликарпова ул.,д.2 корп.4 изм.pdf",
+          "document_path": "files/2020/12/2/2.pdf"
+        },
+        {
+          "document_id": 10,
+          "document_name": "M-03-040506 исправленное.pdf",
+          "document_path": "files/2020/12/3/13_x8Z5ZJY.pdf"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,190 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-22 17:53+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: account/admin.py:17
+msgid "Personal info"
+msgstr "Персональная информация"
+
+#: account/admin.py:18
+msgid "Permissions"
+msgstr "Разрешения"
+
+#: account/api/views.py:32
+msgid "successfully registered a new user."
+msgstr ""
+
+#: account/forms.py:13 account/forms.py:45
+msgid "Required. Add a valid email address"
+msgstr "Обязательно. Добавьте правильный email адрес"
+
+#: account/forms.py:21 account/models.py:56
+msgid "Password"
+msgstr "Пароль"
+
+#: account/forms.py:22
+msgid "Password confirmation"
+msgstr "Подтверждение пароля"
+
+#: account/forms.py:33
+msgid "Password do not match"
+msgstr "Пароли не совпадают"
+
+#: account/models.py:57
+msgid "Email"
+msgstr ""
+
+#: account/models.py:58
+msgid "first name"
+msgstr "Имя"
+
+#: account/models.py:59
+msgid "last name"
+msgstr "Фамилия"
+
+#: account/models.py:60
+msgid "Gender"
+msgstr "Пол"
+
+#: account/models.py:63
+msgid "active"
+msgstr "Активный"
+
+#: account/models.py:66
+msgid ""
+"Designates whether this user should be treated as active. Unselect this "
+"instead of deleting accounts."
+msgstr ""
+"Обозначает, следует ли считать этого пользователя активным. Отменить этот "
+"флажок вместо того, чтобы удалять аккаунты."
+
+#: account/models.py:87
+msgid "Birthday"
+msgstr "День рождения"
+
+#: account/models.py:88
+msgid "Job title"
+msgstr "Должность"
+
+#: account/models.py:89
+msgid "Phone"
+msgstr "Номер телефона"
+
+#: account/models.py:90
+msgid "Company name"
+msgstr ""
+
+#: account/models.py:91
+msgid "Linkedin"
+msgstr ""
+
+#: account/models.py:92
+msgid "Facebook"
+msgstr ""
+
+#: account/models.py:93
+msgid "Vkontakte"
+msgstr ""
+
+#: account/models.py:94
+msgid "Instagram"
+msgstr ""
+
+#: account/models.py:95
+msgid "Notes"
+msgstr "Заметки"
+
+#: account/models.py:96
+msgid "Email notify"
+msgstr "Оповещания по email"
+
+#: account/templates/account/login.html:12
+msgid "Log In"
+msgstr "Вход"
+
+#: account/templates/account/login.html:18
+msgid "Login"
+msgstr "Вход"
+
+#: account/templates/account/login.html:29
+msgid "Need an account?"
+msgstr "Необходим аккаунт?"
+
+#: account/templates/account/login.html:29
+msgid "Sign Up Now"
+msgstr "Зарегистрируйтесь сейчас"
+
+#: account/templates/account/logout.html:6
+msgid "You have been logged out"
+msgstr "Вы вышли из аккаунта"
+
+#: account/templates/account/logout.html:10
+msgid "Log In again"
+msgstr "Войти снова"
+
+#: account/templates/account/profile.html:9
+msgid "Dashboard"
+msgstr "Главная"
+
+#: account/templates/account/profile.html:10
+msgid "Profile"
+msgstr "Профиль"
+
+#: account/templates/account/profile.html:29
+msgid "User profile picture"
+msgstr "Изображение пользователя"
+
+#: account/templates/account/profile.html:59
+msgid "Profile Info"
+msgstr "Информация о пользователе"
+
+#: account/templates/account/profile.html:67
+msgid "Update"
+msgstr "Обновить"
+
+#: account/templates/account/register.html:12
+msgid "Join Today"
+msgstr "Регистрация"
+
+#: account/templates/account/register.html:18
+msgid "Sign Up"
+msgstr "Зарегистрироваться"
+
+#: account/templates/account/register.html:28
+msgid "Already have an account?"
+msgstr "У Вас уже есть аккаунт?"
+
+#: account/templates/account/register.html:28
+msgid "Sign In"
+msgstr "Вход"
+
+#: account/views.py:35
+#, python-format
+msgid "Account created for %(email)s"
+msgstr "Аккаунт создан для %(email)s"
+
+#: account/views.py:36
+msgid "Your account has been created! You are now able to log in"
+msgstr "Ваш аккаунт создан! Теперь вы можете войти в систему"
+
+#: account/views.py:67
+msgid "Your account has been updated!"
+msgstr "Ваш аккаунт был обновлен!"

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <item type="dict">
+        <doc_name type="str">1.pdf</doc_name>
+        <type_name type="str">Свид. АГР</type_name>
+        <date type="str">21.06.02</date>
+        <issuing_authority type="str">КОМИТЕТ ПО АРХИТЕКТУРЕ И ГРАДОСТРОИТЕЛЬСТВУ Г.МОСКВЫ</issuing_authority>
+    </item>
+</root>
+
+

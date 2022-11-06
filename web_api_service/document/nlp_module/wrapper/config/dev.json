@@ -1,0 +1,29 @@
+{
+  "server": {
+    "upload": {
+      "host": "89.223.95.49",
+      "port": 8887
+    },
+    "transfer": {
+      "host": "89.223.95.49",
+      "port": 8888
+    }
+  },
+  "rabbit_mq": {
+    "host": "89.223.95.49",
+    "port": 5672,
+    "user": "dueva",
+    "password": "n3dF8dfXpweZv",
+    "listen_queue": "text-analysis-queue",
+    "to_exchange": ""
+  },
+  "database_url": "postgres://dueva:n3dF8dfXpweZv@89.223.95.49:5555/dueva_db?sslmode=disable",
+  "local_storage_path": "/storage",
+  "mysql": {
+    "host": "116.203.223.126",
+    "port": 3306,
+    "db": "document_processing",
+    "user": "dueva",
+    "password": "Dev197374labS###"
+  }
+}

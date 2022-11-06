@@ -1,0 +1,2502 @@
+{% extends "document/base_document.html" %}
+{% load static %}
+{% load i18n %}
+{% load document_tags %}
+
+{% block page_title %}
+
+{% endblock %}
+
+{% block breadcrumb %}
+{% endblock %}
+
+{% block style %}
+    <!--Include static-->
+    <style>
+        .content-header {
+            padding: 0;
+            height: 10px;
+        }
+
+        .content-wrapper {
+            left: 0;
+            position: fixed;
+            right: 0;
+            top: 0;
+            max-height: calc(100vh - 7rem - 2px);
+        }
+
+        .content {
+            max-height: calc(100vh - 7rem - 12px);
+        }
+
+        .card {
+            max-height: calc(100vh - 7rem - 28px);
+        }
+
+        .card-body {
+            max-height: calc(100vh - 7rem - 76px);
+        }
+
+        .card-body {
+            max-height: calc(100vh - 7rem - 76px);
+        }
+
+        #card-body {
+            display: flex;
+        }
+
+        #card-body > div {
+            display: flex;
+        }
+
+        .card-tools-left {
+            float: left;
+        }
+
+        #card[data-mode="select-words"] .card-tools-left .btn,
+        #card[data-mode="select-rect"] .card-tools-left .btn,
+        #card[data-mode="select-words"] .card-tools .btn,
+        #card[data-mode="select-rect"] .card-tools .btn {
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+
+        #card[data-ocr="google"] div[data-id="tesseract"],
+        #card[data-ocr="tesseract"] div[data-id="google"] {
+            display: none;
+        }
+
+        .pages-wrapper {
+            flex: 1;
+        }
+
+        .nlp-wrapper {
+            flex: 1;
+        }
+
+        .nlp-wrapper tr {
+            border-left: 5px solid gray;
+        }
+
+        .nlp-wrapper tr[data-status='0'] {
+            border-color: gray;
+        }
+
+        .nlp-wrapper tr[data-status='1'] {
+            border-color: purple;
+        }
+
+        .nlp-wrapper tr[data-status='2'] {
+            border-color: blue;
+        }
+
+        .nlp-wrapper tr[data-status='2'] .attr-text {
+            font-style: italic !important
+        }
+
+
+        .nlp-wrapper tr[data-status='3'] {
+            border-color: orange;
+        }
+
+        .nlp-wrapper tr[data-status='4'] {
+            border-color: green;
+        }
+
+        .page-wrapper {
+            position: relative;
+            border: 2px solid gray;
+        }
+
+        .page-wrapper > canvas, .page-wrapper > img {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page-wrapper > canvas {
+            /*max-width: 100%;*/
+            position: absolute;
+            top: 0px;
+            left: 0px;
+
+        }
+
+        .page-wrapper > img {
+            /*position: absolute;*/
+            top: 0px;
+            /*left: 0px;*/
+        }
+
+        .edit-mode {
+            border-color: #6cff6c;
+        }
+
+        .editable:hover {
+        }
+
+        .canvas-tooltip, .canvas-remarker, .canvas-chart-toolbar {
+            display: none;
+            position: fixed;
+            height: 50px;
+            background: lightgray;
+            border-radius: 6px;
+            border: 1px solid gray;
+        }
+
+        .canvas-tooltip.usertext {
+            background: #ffffa7;
+        }
+
+        .canvas-tooltip {
+            padding: 10px;
+        }
+
+        .canvas-remarker {
+            padding: 10px;
+        }
+
+        .canvas-tooltip.active, .canvas-remarker.active, .canvas-chart-toolbar.active {
+            display: flex;
+        }
+
+        .remarker-remove {
+            display: block;
+        }
+
+        /*.canvas-remarker[data-status='4'] .remarker-remove {*/
+        /*    display: block;*/
+        /*}*/
+
+        .canvas-chart-toolbar.active {
+            padding: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 60px;
+        }
+
+        [data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #888;
+            font-style: italic;
+        }
+
+        .nlp-field {
+            background: #f9f9f9;
+        }
+
+        .user-field {
+            background: #ffffa7;
+        }
+
+        .new-field {
+            background: #6cff6c;
+        }
+
+        .add-row {
+            background: rgba(0, 255, 0, 0.08);
+        }
+
+        .over-ocr, .nlp-wrapper .field:hover {
+            background: rgba(0, 255, 0, 0.4);
+        }
+
+        .hidden-canvas {
+            display: none;
+        }
+
+        .edit-mode .edit-canvas {
+            display: block;
+        }
+
+        .edit-canvas {
+            cursor: crosshair;
+            display: none;
+        }
+
+        .attr-text, .attr-editor {
+            display: none;
+        }
+
+        .attr-text.active, .attr-editor.active {
+            display: block;
+        }
+
+        .table-th {
+            position: relative;
+        }
+
+        .table-toolbar {
+            /*display: flex;*/
+            /*flex-direction: column;*/
+            /*position: absolute;*/
+            top: 10px;
+            right: 10px;
+        }
+
+        .nounderline {
+            text-decoration: none !important;
+            color: white;
+        }
+
+        .editor[data-type="ocr_text"] .editor-ocr-ids {
+            display: none;
+        }
+
+        .editor[data-type="ocr_ids"] .editor-ocr-text {
+            display: none;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block tree_view %}
+
+    {% include "document/includes/tree_view_menu.html" %}
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="card" id="card" data-mode="general" data-ocr="google">
+        <div class="card-header">
+            <div class="card-tools-left">
+                <div class="form-group btn-group btn-group-toggle mb-0 mr-1"
+                     data-toggle="button">
+                    <button type="button" class="btn btn-secondary js-tool active" data-action="ocr-show">
+                        <i class="fas fa-square"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary js-tool" data-action="ocr-edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                <a href="{% url 'google_nlp_recalculate_url' document_id=document.id %}" id="ocr_google_recalculate"
+                   class="btn btn-secondary">
+                    <i class="fas fa-exchange-alt mr-2"></i>{% trans "OCR Google" %}
+                </a>
+                <button class="btn btn-secondary" disabled>
+                    <i class="fas fa-exchange-alt mr-2"></i>{% trans "OCR Tesseract" %}
+                </button>
+            </div>
+
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool js-tool" data-action="sync">
+                    <i class="fas fa-sync"></i>
+                </button>
+
+                <button class="btn btn-secondary" disabled>
+                    <i class="fas fa-exchange-alt mr-2"></i>{% trans "NLP Google" %}
+                </button>
+                <a href="{% url 'tesseract_nlp_recalculate_url' document_id=document.id %}"
+                   id="nlp_tesseract_recalculate" class="btn btn-secondary">
+                    <i class="fas fa-exchange-alt mr-2"></i>{% trans "NLP Tesseract" %}
+                </a>
+
+                <div class="form-group btn-group btn-group-toggle mb-0 mr-1" data-action="ocr-choose"
+                     data-toggle="buttons">
+                    <label class="btn btn-secondary active js-tool" type="radio" data-action="google-show"
+                           name="options" title="Google OCR">
+                        <input type="radio" name="options" checked="true" data-action="google-show">
+                        <i class="fas">G</i>
+                    </label>
+                    <label class="btn btn-secondary js-tool mr-1" type="radio" data-action="tesseract-show"
+                           name="options" title="Tesseract OCR">
+                        <input type="radio" name="options" data-action="tesseract-show">
+                        <i class="fas fa-cubes"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div id="card-body" style="max-height: calc(100vh - 7rem - 116px);" data-mode="general" data-ocr="google">
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.card-body -->
+
+        <!-- /.footer -->
+        <div id="modals"></div>
+        <div class="canvas-tooltip" id="canvas-tooltip"></div>
+        <div class="canvas-remarker row" id="canvas-remarker">
+            <div class="remarker-origin"></div>
+            <input class="remarker-change"></input>
+            <button type="submit" class="remarker-send send"><i class="fas fa-paper-plane"></i></button>
+            <button type="reset" class="remarker-remove remove"><i class="fas fa-trash"></i></button>
+        </div>
+        <div class="canvas-chart-toolbar" id="canvas-chart-toolbar">
+            <a href="#" class="edit" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-pen"></i></a>
+            <a download href="" class="download" target="_blank"><i class="fas fa-download"></i></a>
+        </div>
+    </div>
+    <!-- /.card -->
+
+
+    <!--
+    1. Вы уверены что хотите выполнить перерасчёт OCR Google сервиса? Текст распознанный вручную будет потерян.
+    Вы уверены что хотите выполнить перерасчёт OCR Tesseract сервиса? Текст распознанный вручную будет потерян.
+
+    2. Вы уверены что хотите выполнить перерасчёт Парсинга атрибутов (на основе Google OCR)? Атрибуты распознанные вручную будут потеряны.
+    Вы уверены что хотите выполнить перерасчёт Парсинга атрибутов (на основе Tesseract OCR)? Атрибуты распознанные вручную будут потеряны.
+    -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="linksModal" tabindex="-1" aria-labelledby="linksModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="linksModalLabel">Связанные документы</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h1>Найдены следующие связанные документы:</h1>
+                    <div class="col-md-12 mb-2 mt-3" id="links_datatable"/>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <!--Evgenii JS-->
+    <script src="{% static 'js/bootstrap-confirm.min.js' %}"></script>
+    <script>
+        $(function () {
+            $('#nlp_tesseract_recalculate').confirm({
+                title: '{% trans "Recalculate tesseract NLP" %}',
+                text: '{% trans "Are you sure you want to recalculate Attribute Parsing (based on Tesseract OCR)? Attributes recognized manually will be lost." %}',
+                btnConfirm: '{% trans "Recalculate" %}',
+                btnCancel: '{% trans "Cancel" %}'
+            })
+        });
+
+        $(function () {
+            $('#ocr_google_recalculate').confirm({
+                title: '{% trans "Recalculate google OCR" %}',
+                text: '{% trans "Are you sure you want to recalculate the Google OCR service? Manually recognized text will be lost." %}',
+                btnConfirm: '{% trans "Recalculate" %}',
+                btnCancel: '{% trans "Cancel" %}'
+            })
+        });
+    </script>
+
+    <!--JavaScript-->
+    <script type="text/javascript">
+        // API
+        const API = {
+            google: {
+                nlp: {
+                    add: "{% url 'ajax_add_nlp_record_url' %}",
+                    edit: "{% url 'ajax_edit_nlp_record_url' %}",
+                },
+                ocr: {
+                    add: "{% url 'ajax_add_new_ocr_record_url' %}",
+                    edit: "{% url 'ajax_edit_ocr_table_url' %}",
+                    remove: "{% url 'ajax_remove_ocr_table_url' %}",
+                },
+            },
+            tesseract: {
+                nlp: {
+                    add: "{% url 'ajax_add_nlp_tesseract_record_url' %}",
+                    edit: "{% url 'ajax_edit_nlp_tesseract_record_url' %}",
+                },
+                ocr: {
+                    add: "{% url 'ajax_add_new_ocr_tesseract_record_url' %}",
+                    edit: "{% url 'ajax_edit_ocr_tesseract_table_url' %}",
+                    remove: "{% url 'ajax_remove_ocr_tesseract_table_url' %}",
+                },
+            },
+            sync: "{% url 'ajax_convert_nlp_table_to_nlp_result_url' %}",
+        };
+
+        function getGoogleData() {
+            const json_pages = {{ json_pages | safe }};
+            const nlp_json = {{ nlp_json | safe }};
+            const activePageId = nlp_json.active_page_id;
+            const doc_class_json = {{ doc_class_json | safe }};
+            const available_attributes_json = {{ available_attributes_json | safe }};
+            const allWords = json_pages.reduce((acc, page) => [...acc, ...page.words_coordinates], []);
+            const nlp_table = nlp_json.nlp_table;
+
+            console.log('google', {
+                json_pages,
+                nlp_json,
+                activePageId,
+                doc_class_json,
+                available_attributes_json,
+                allWords,
+                nlp_table,
+            });
+
+            return {
+                json_pages,
+                nlp_json,
+                doc_class_json,
+                available_attributes_json,
+                allWords,
+                nlp_table,
+                activePageId,
+            }
+        }
+
+        function getTesseractData() {
+            const json_pages = {{ json_pages_tesseract | safe }};
+            const nlp_json = {{ nlp_tesseract_json | safe }};
+            const activePageId = nlp_json.active_page_id;
+            const doc_class_json = {{ doc_class_json | safe }};
+            const available_attributes_json = {{ available_attributes_json | safe }};
+            const allWords = json_pages.reduce((acc, page) => [...acc, ...page.words_coordinates], []);
+            const nlp_table = nlp_json.nlp_table;
+
+            console.log('tesseract', {
+                json_pages,
+                nlp_json,
+                activePageId,
+                doc_class_json,
+                available_attributes_json,
+                allWords,
+                nlp_table,
+            });
+
+            return {
+                json_pages,
+                nlp_json,
+                activePageId,
+                doc_class_json,
+                available_attributes_json,
+                allWords,
+                nlp_table,
+            }
+        }
+
+        const googleOCRData = getGoogleData();
+        const googleOcrComponent = OcrComponent('', 'google', googleOCRData);
+
+        const tesseractOCRData = getTesseractData();
+        const tesseractOcrComponent = OcrComponent('', 'tesseract', tesseractOCRData);
+
+        const cardBody = document.getElementById('card');
+        const cardBodyForOcrComponent = document.getElementById('card-body');
+        cardBodyForOcrComponent.append(googleOcrComponent)
+        cardBodyForOcrComponent.append(tesseractOcrComponent)
+
+        // Toolbar
+        const cardToolsLeft = document.getElementsByClassName('card-tools-left')[0];
+        const cardTools = document.getElementsByClassName('card-tools')[0];
+
+        const toolGoogleShow = cardTools.querySelector('.js-tool[data-action="google-show"]');
+        const toolTesseractShow = cardTools.querySelector('.js-tool[data-action="tesseract-show"]');
+
+        function handlerToolOcrEngineShow(ocr, prevOcr) {
+            return function () {
+                if (
+                    cardBody.dataset.mode !== 'general' ||
+                    cardBody.dataset.ocr === ocr
+                ) {
+                    return;
+                }
+                const ocrPagesEl = document.querySelector(`#card-body > [data-id="${ocr}"] .pages-wrapper`)
+                const prevOcrPagesEl = document.querySelector(`#card-body > [data-id="${prevOcr}"] .pages-wrapper`)
+                const scrollTop = prevOcrPagesEl.scrollTop;
+                cardBody.dataset.ocr = ocr;
+                ocrPagesEl.scroll({
+                    top: scrollTop,
+                    left: 0,
+                })
+            }
+        }
+
+        toolGoogleShow.addEventListener('click', handlerToolOcrEngineShow('google', 'tesseract'));
+        toolTesseractShow.addEventListener('click', handlerToolOcrEngineShow('tesseract', 'google'));
+
+        const toolSync = cardTools.querySelector('.js-tool[data-action="sync"]');
+
+        function handlerToolSync() {
+            $.ajax({
+                method: "GET",
+                url: API.sync,
+                success: (res) => {
+                    location.reload();
+                },
+                error: () => {
+                },
+            });
+        }
+
+        toolSync.addEventListener('click', handlerToolSync);
+
+        const toolOcrShow = cardToolsLeft.querySelector('.js-tool[data-action="ocr-show"]');
+        const toolOcrEdit = cardToolsLeft.querySelector('.js-tool[data-action="ocr-edit"]');
+
+
+        let showOcrCanvases = true;
+        let showOcrEditCanvases = false;
+
+        function setOcrCanvases(show) {
+            const ocrCanvases = document.getElementsByClassName('ocr-canvas');
+            showOcrCanvases = show;
+
+            Array.from(ocrCanvases).forEach((ocrCanvas) => {
+                if (show) {
+                    ocrCanvas.classList.remove('hidden-canvas');
+                } else {
+                    ocrCanvas.classList.add('hidden-canvas');
+                }
+            })
+        }
+
+        function setOcrEditCanvases(show) {
+            const editCanvases = document.getElementsByClassName('edit-canvas');
+            showOcrEditCanvases = show;
+
+            Array.from(editCanvases).forEach((editCanvas) => {
+                const parentDiv = upTo(editCanvas, 'div');
+                if (show) {
+                    parentDiv.classList.add('edit-mode');
+                } else {
+                    parentDiv.classList.remove('edit-mode');
+                }
+            })
+        }
+
+        function handlerToolOcrShow() {
+            if (cardBody.dataset.mode !== 'general') {
+                return;
+            }
+            setOcrCanvases(!showOcrCanvases);
+        };
+
+        function handlerToolOcrEdit() {
+            if (cardBody.dataset.mode !== 'general') {
+                return;
+            }
+            setOcrEditCanvases(!showOcrEditCanvases);
+        };
+
+        toolOcrShow.addEventListener('click', handlerToolOcrShow);
+        toolOcrEdit.addEventListener('click', handlerToolOcrEdit);
+
+        // Tool
+        function createElement(tag, attributes, text, children) {
+            const el = document.createElement(tag);
+            if (text) {
+                el.textContent = text;
+            }
+            if (attributes) {
+                Object.entries(attributes).forEach(([attributeName, attributeValue]) => {
+                    el.setAttribute(attributeName, attributeValue);
+                })
+            }
+            if (children) {
+                children.forEach((ch) => {
+                    const chEl = createElement(...ch);
+                    el.appendChild(chEl);
+                })
+            }
+            return el;
+        }
+
+        function upTo(el, tagName) {
+            tagName = tagName.toLowerCase();
+
+            while (el && el.parentNode) {
+                el = el.parentNode;
+                if (el.tagName && el.tagName.toLowerCase() == tagName) {
+                    return el;
+                }
+            }
+            return null;
+        }
+
+        // Implementation of OcrComponent
+        function OcrComponent(parentElementId, name, data) {
+            // Data
+            const {
+                json_pages,
+                nlp_json,
+                activePageId,
+                doc_class_json,
+                available_attributes_json,
+                allWords,
+                nlp_table,
+            } = data;
+
+            let nlpRects = getNlpRects();
+
+            function getNlpRects() {
+                return nlp_table.map((attr, attrIndex) => {
+                    const nlp_id = attr.nlp_id.toString();
+                    const wordIds = attr.ocr_word_ids || [];
+
+                    const words = allWords.filter(word => wordIds.includes(word.id));
+                    const block = {
+                        x0: Math.min(...words.map(word => word.x0)),
+                        y0: Math.min(...words.map(word => word.y0)),
+                        x1: Math.max(...words.map(word => word.x1)),
+                        y1: Math.max(...words.map(word => word.y1)),
+                    };
+                    const page_id = words[0]?.page_id || json_pages[0]?.page_id || 0;
+                    return {
+                        ...attr,
+                        wordIds,
+                        ...block,
+                        nlp_id,
+                        page_id,
+                    };
+                });
+            }
+
+            function createComponent() {
+                const ocrComponentWrapper = createElement('div', {
+                    'class': 'col-md-12 row',
+                    'data-id': name,
+                    'style': 'max-height: calc(100vh - 7rem - 116px);',
+                });
+                const pagesWrapper = createElement('div', {
+                    'class': 'col-md-8 pages-wrapper',
+                    'data-mode': 'general',
+                    'style': 'overflow-y: scroll; max-height: calc(100vh - 7rem - 116px);',
+                });
+
+                const nlpWrapper = createElement('div', {
+                    'class': 'col-md-4 nlp-wrapper',
+                    'style': 'overflow-y: scroll; max-height: calc(100vh - 7rem - 116px);',
+                });
+                ocrComponentWrapper.appendChild(pagesWrapper);
+                ocrComponentWrapper.appendChild(nlpWrapper);
+                return {
+                    ocrComponentWrapper,
+                    pagesWrapper,
+                    nlpWrapper,
+                };
+            }
+
+            const {
+                ocrComponentWrapper,
+                pagesWrapper,
+                nlpWrapper,
+            } = createComponent();
+
+            function nlpTableRenderer(nlpWrapper) {
+                // clear
+                while (nlpWrapper.lastElementChild) {
+                    nlpWrapper.removeChild(nlpWrapper.lastElementChild);
+                }
+                // json-table
+
+                // Create Table
+                const getWords = (attr) => {
+                    const wordIds = attr.ocr_word_ids || [];
+                    return wordIds.map((id) => {
+                        return allWords.find((word) => word.id === id);
+                    }).filter(x => x);
+                }
+
+                const getAttrValue = (attr) => {
+                    if (attr.hasOwnProperty('attribute_value')) {
+                        return attr.attribute_value;
+                    } else if (attr.hasOwnProperty('ocr_word_ids') && attr.ocr_word_ids?.length) {
+                        const words = getWords(attr);
+                        // console.log(attr, words);
+                        return words.map((word) => word.user_text || word.ocr_text).join(' ');
+                    } else if (attr.hasOwnProperty('ocr_text')) {
+                        return attr.ocr_text;
+                    }
+                }
+
+                const getTableRows = () => {
+                    const usedAttributes = nlp_table.map((attr) => attr.attribute_id);
+                    const doc_class_id = nlp_json.doc_class_id;
+                    const available_attributes = available_attributes_json.find(
+                        (value) => value.doc_class_id === doc_class_id
+                    )?.attributes;
+                    const attributes = available_attributes.filter((attr) => !usedAttributes.includes(attr.attribute_id));
+
+                    const otherAttributes = attributes.map((attribute, index) => {
+                        return {
+                            ...attribute,
+                            nlp_id: `new`,
+                            ocr_text: null,
+                            document_count: 0,
+                            ocr_word_ids: null,
+                            status: 0,
+                        }
+                    });
+
+                    const nlp_rows = [{
+                        nlp_id: 'doc_class',
+                        attribute_name: "Тип документа",
+                        attribute_value_name: nlp_json.doc_class_name,
+                        attribute_value: nlp_json.doc_class_id,
+                    },
+                        ...[
+                            ...nlp_table,
+                            ...otherAttributes,
+                        ].sort((nlp1, nlp2) => {
+                            return nlp1.attribute_id - nlp2.attribute_id;
+                        }),
+                        {
+                            nlp_id: 'add-row',
+                            available_attributes: attributes,
+                        }];
+
+                    const rowValueRenderer = (row) => {
+                        switch (row.nlp_id) {
+                            case 'doc_class':
+                                return {
+                                    tag: 'td',
+                                    children: [{
+                                        tag: 'select',
+                                        attributes: {
+                                            disabled: "disabled",
+                                            name: "class_id",
+                                            id: "class_id",
+                                            class: "col-sm-12 form-control",
+                                            value: row.attribute_value,
+                                        },
+                                        children: doc_class_json.map((doc_class) => {
+                                            const attributes = {
+                                                value: doc_class.doc_class_id,
+                                            };
+                                            if (row.attribute_value === doc_class.doc_class_id) {
+                                                attributes.selected = true;
+                                            }
+                                            return {
+                                                tag: 'option',
+                                                attributes,
+                                                text: doc_class.doc_class_name,
+                                            };
+                                        })
+                                    }],
+                                };
+                            case 'new':
+                                return {
+                                    tag: 'td',
+                                    class: 'attr-editable',
+                                    attributes: {
+                                        contenteditable: 'false',
+                                        'data-attribute': row.attribute_id,
+                                        id: row.nlp_id,
+                                    },
+                                    children: [{
+                                        tag: 'span',
+                                        class: `attr-text active${row.status === 0 ? ' border-success' : ''}`,
+                                        text: getAttrValue(row),
+                                    }, {
+                                        tag: 'div',
+                                        class: 'attr-editor',
+                                        attributes: {
+                                            'data-id': row.nlp_id,
+                                            'data-attribute': row.attribute_id,
+                                            'data-words': row.ocr_word_ids,
+                                        },
+                                    }
+                                    ],
+                                };
+                            default:
+                                return {
+                                    tag: 'td',
+                                    class: 'attr-editable',
+                                    attributes: {
+                                        contenteditable: 'false',
+                                        'data-attribute': row.attribute_id,
+                                        id: row.nlp_id,
+                                    },
+                                    children: [{
+                                        tag: 'span',
+                                        class: `attr-text active`,
+                                        text: getAttrValue(row),
+                                    }, {
+                                        tag: 'div',
+                                        class: 'attr-editor',
+                                        attributes: {
+                                            'data-id': row.nlp_id,
+                                            'data-attribute': row.attribute_id,
+                                            'data-words': row.ocr_word_ids,
+                                        },
+                                    }
+                                    ],
+                                };
+                        }
+                    };
+
+                    const rowTrRenderer = (row) => {
+                        const defaultRow = {
+                            tag: 'tr',
+                            attributes: {
+                                'data-id': row.nlp_id,
+                                'data-attr': row.nlp_id,
+                                'data-attribute': row.attribute_id,
+                                'data-status': row.status,
+                            },
+                        };
+                        switch (row.nlp_id) {
+                            case 'add-row':
+                                const newAttribute = {
+                                    attribute_id: 'NONE',
+                                    attribute_name: "Новый атрибут",
+                                }
+                                return Object.assign({}, defaultRow, {
+                                    class: 'add-row',
+                                    children: [
+                                        {
+                                            tag: 'th',
+                                            attributes: {
+                                                scope: 'row',
+                                                contenteditable: 'false',
+                                                'data-placeholder': "Новый атрибут",
+
+                                            },
+                                            // TODO: Select new attribute
+                                            // children: [{
+                                            //     tag: 'select',
+                                            //     attributes: {
+                                            //         name: "add-row",
+                                            //         id: "add-row",
+                                            //         class: "col-sm-12 form-control",
+                                            //         value: newAttribute.attribute_id,
+                                            //     },
+                                            //     children: [
+                                            //         newAttribute,
+                                            //         ...row.available_attributes
+                                            //     ].map((available_attribute) => {
+                                            //             const attributes = {
+                                            //                 value: available_attribute.attribute_id,
+                                            //             };
+                                            //             if (newAttribute.attribute_id === available_attribute.attribute_id) {
+                                            //                 attributes.selected = true;
+                                            //             }
+                                            //             return {
+                                            //                 tag: 'option',
+                                            //                 attributes,
+                                            //                 text: available_attribute.attribute_name,
+                                            //             };
+                                            //         })
+                                            // }],
+                                        },
+                                        {
+                                            tag: 'td',
+                                            attributes: {
+                                                contenteditable: 'false',
+                                            },
+                                        }
+                                    ]
+                                });
+                            default:
+                                const displayLink = row.documents_count && row.documents_count >= 1;
+                                const displayScroll = row.ocr_word_ids && row.ocr_word_ids.length;
+                                return Object.assign({}, defaultRow, {
+                                    class: `${row.ocr_word_ids ? 'field ' : ''}nlp-field`,
+                                    children: [
+                                        {
+                                            tag: 'th',
+                                            class: 'table-th',
+                                            attributes: {
+                                                scope: 'row',
+                                            },
+                                            text: row.attribute_name,
+                                            children: [
+                                                {
+                                                    tag: 'div',
+                                                    class: 'table-toolbar',
+                                                    children: [
+                                                        {
+                                                            tag: 'button',
+                                                            attributes: {
+                                                                type: 'button',
+                                                                class: 'btn btn-tool js-table-tool',
+                                                                'data-action': 'links',
+                                                                'data-backdrop': "false",
+                                                                'data-toggle': "modal",
+                                                                'data-target': "#linksModal",
+                                                                'data-id': row.nlp_id,
+                                                                style: `display: ${displayLink ? 'block' : 'none'}`,
+                                                            },
+                                                            children: [{
+                                                                tag: 'i',
+                                                                attributes: {
+                                                                    'data-id': row.nlp_id,
+                                                                },
+                                                                class: 'fas fa-link',
+                                                            }]
+                                                        },
+                                                        {
+                                                            tag: 'button',
+                                                            attributes: {
+                                                                type: 'button',
+                                                                class: 'btn btn-tool js-table-tool',
+                                                                'data-action': 'scroll',
+                                                                style: `display: ${displayScroll ? 'block' : 'none'}`,
+                                                                'data-id': row.nlp_id,
+                                                            },
+                                                            children: [{
+                                                                tag: 'i',
+                                                                attributes: {
+                                                                    'data-id': row.nlp_id,
+                                                                },
+                                                                class: 'fas fa-arrow-circle-left',
+                                                            }]
+                                                        },
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        rowValueRenderer(row),
+                                    ]
+                                });
+                        }
+                    };
+
+                    const rows = nlp_rows.map((row) => rowTrRenderer(row));
+                    return rows;
+                };
+
+                const getTable = () => {
+                    return {
+                        tag: 'table',
+                        class: 'table',
+                        children: [
+                            {
+                                tag: 'tbody',
+                                children: getTableRows(),
+                            }
+                        ],
+                    };
+                };
+
+                // Render Table
+                const renderer = (root) => {
+                    const rootEl = document.createElement(root.tag);
+                    if (root.class) {
+                        rootEl.classList.add(...root.class.split(' '));
+                    }
+                    if (root.text) {
+                        rootEl.textContent = root.text;
+                    }
+                    if (root.attributes) {
+                        Object.entries(root.attributes).forEach(([attributeName, attributeValue]) => {
+                            rootEl.setAttribute(attributeName, attributeValue);
+                        })
+                    }
+                    if (root.children) {
+                        root.children.forEach((ch) => {
+                            const chEl = renderer(ch);
+                            rootEl.appendChild(chEl);
+                        })
+                    }
+
+                    return rootEl;
+                }
+
+                const renderTable = () => {
+                    const table = renderer(getTable());
+                    nlpWrapper.appendChild(table);
+                };
+
+                renderTable();
+
+                // OK!
+
+                return {
+                    getWords,
+                    getAttrValue,
+                }
+            }
+
+            const tableTools = nlpTableRenderer(nlpWrapper);
+            // const nlpFields = nlpWrapper.getElementsByClassName('nlp-fields');
+            const nlpFields = nlpWrapper.getElementsByTagName('tr');
+            const nlpActions = nlpWrapper.getElementsByClassName('js-table-tool');
+
+            const getPageWrapper = function (pageId) {
+                return pagesWrapper.querySelector(`.page-wrapper[data-page="${pageId}"]`);
+            }
+
+            const scrollToPage = function (pageId, canvasOffset = 0, behavior = 'auto') {
+                const pageWrapper = getPageWrapper(pageId);
+                const offsetTop = +pageWrapper.offsetTop;
+
+                pagesWrapper.scroll({
+                    top: offsetTop + canvasOffset,
+                    left: 0,
+                    behavior
+                });
+            }
+
+            const onTableLinksClickHandler = (event) => {
+                const target = event.target;
+                const nlp_id = +target.dataset.id;
+                const tableEl = document.getElementById('links_datatable');
+
+                // console.log(nlp_table.find(row => row.nlp_id === nlp_id), nlp_id)
+                const nlp = nlp_table.find((row) => row.nlp_id === nlp_id);
+                const links = nlp?.documents;
+
+                const renderedRows = links.map((link, index) => {
+                    return `
+                        <tr role="row" class="${index % 2 === 0 ? 'even' : 'odd'}">
+                            <td class="sorting_1" style="background: #FFFFFF; font-weight: 500;">${link.document_id}</td>
+                            <td style="background: #FFFFFF; font-weight: 500;">
+                                <a class="table-edit" data-id="" target="_blank" href="/document/detail/${link.document_id}" title="Document detail">
+                                    ${link.document_name}
+                                </a>
+                            </td>
+                            <td style="background: #FFFFFF; font-weight: 500;">${link.doc_class_name}</td>
+                            <td style="background: #FFFFFF; font-weight: 500;">${nlp.link_name}</td>
+                            <td style="background: #FFFFFF; font-weight: 500;">${link.nlp?.ocr_text}</td>
+                        </tr>
+                `;
+                });
+
+                const tableInner = `
+                    <table id="doc_table"
+                           class="table table-striped table-bordered dt-responsive nowrap table-hover"
+                           style="width:100%">
+                        <thead>
+                        <tr>
+                            <th>{% trans "ID" %}</th>
+                            <th>{% trans "Document" %}</th>
+                            <th>{% trans "Document type" %}</th>
+                            <th>Атрибут</th>
+                            <th>Значение</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            ${renderedRows.join('')}
+                        </tbody>
+
+                    </table>
+                `;
+
+                tableEl.innerHTML = tableInner;
+                // console.log(tableEl);
+            }
+            const onTableScrollClickHandler = (event) => {
+                const target = event.target;
+                const nlp_id = target.dataset.id;
+                const nlp_rect = nlpRects.find((rect) => +rect.nlp_id === +nlp_id);
+                const canvasTop = +nlp_rect.y0;
+                const page_id = nlp_rect.page_id;
+                const ocrCanvas = pagesWrapper.querySelector(`.ocr-canvas[data-page="${page_id}"]`);
+                const r = ocrCanvas.getBoundingClientRect();
+                const ratio = parseInt(ocrCanvas.getAttribute('width')) / r.width;
+
+                const canvasOffset = (canvasTop / ratio);
+
+                scrollToPage(page_id, canvasOffset, "smooth")
+            }
+            Array.from(nlpActions).forEach((action) => {
+                switch (action?.dataset?.action) {
+                    case 'links':
+                        action.addEventListener('click', onTableLinksClickHandler);
+                        break;
+                    case 'scroll':
+                        action.addEventListener('click', onTableScrollClickHandler);
+                        break;
+                    default:
+                    //do nothing
+                }
+            })
+
+            const nlpEditableFields = nlpWrapper.getElementsByClassName('attr-editable');
+
+            class FieldEditor {
+                constructor(nlp_id, attribute_id, doc_id, doc_class_id, name) {
+                    this.pagesWrapper = pagesWrapper;
+                    this.nlp_id = nlp_id;
+                    this.attribute_id = attribute_id;
+                    this.doc_id = doc_id;
+                    this.name = name;
+                    this.doc_class_id = doc_class_id;
+                    if (nlp_id !== 'new') {
+                        this.data = nlp_table.find(row => row.nlp_id === Number(nlp_id));
+                    } else {
+                        const available_attributes = available_attributes_json.find(
+                            (value) => value.doc_class_id === doc_class_id
+                        )?.attributes;
+                        this.data = available_attributes.find(attr => attr.attribute_id === this.attribute_id);
+                    }
+                    this.items = this.data.ocr_word_ids ? [...this.data.ocr_word_ids] : [];
+                    this.ocr_text = this.data.ocr_text || null
+
+                    this.editorType = this.nlp_id === 'new' || this.items.length || !this.ocr_text ? 'ocr_ids' : 'ocr_text';
+
+                    this.init();
+                }
+
+                renderWord(word) {
+                    const text = word.user_text || word.ocr_text;
+                    const li = document.createElement('li');
+                    li.classList.add('select2-selection__choice');
+                    li.dataset.id = word.id;
+                    li.setAttribute('title', text);
+                    const removeBtn = document.createElement("span");
+                    removeBtn.classList.add('select2-selection__choice__remove');
+                    removeBtn.setAttribute('role', 'presentation');
+                    removeBtn.dataset.id = word.id;
+                    removeBtn.dataset.remove = true;
+                    removeBtn.textContent = '×';
+                    li.appendChild(removeBtn);
+                    const textField = document.createElement("span");
+                    textField.setAttribute('contenteditable', 'true');
+                    textField.textContent = text;
+                    textField.addEventListener('dblclick', (e) => {
+                    })
+                    li.appendChild(textField);
+                    return li;
+                }
+
+                renderWords() {
+                    while (this.list.lastElementChild) {
+                        this.list.removeChild(this.list.lastElementChild);
+                    }
+                    const items = this.items;
+                    const words = items.map((item) => allWords.find(word => word.id === item)).filter(x => x);
+                    words.forEach(word => this.list.appendChild(this.renderWord(word)));
+                }
+
+                renderList() {
+                    const container = document.createElement("div");
+                    container.classList.add('editor-container');
+
+                    const selection = document.createElement("span");
+                    selection.classList.add('editor-ocr-ids', 'form-group', 'select2-container', 'select2-container--default');
+                    selection.setAttribute('style', 'width: 100%;')
+                    const selection2 = document.createElement("span");
+                    selection2.classList.add('select2-selection--multiple');
+                    const list = document.createElement("ui");
+                    list.classList.add('select2-selection__rendered');
+                    selection2.appendChild(list);
+                    selection.appendChild(selection2);
+                    this.list = list;
+
+                    this.renderWords();
+
+                    $(list).sortable();
+                    $(list).disableSelection();
+
+                    container.appendChild(selection);
+
+                    const textarea = document.createElement("textarea");
+                    textarea.classList.add('editor-ocr-text');
+                    textarea.setAttribute('style', 'width: 100%;');
+                    textarea.value = this.ocr_text;
+                    this.ocrTextArea = textarea;
+                    container.appendChild(textarea);
+
+                    return container;
+                }
+
+                renderTools() {
+                    const tools = createElement('div', {
+                        class: "justify-content-between tools d-flex"
+                    });
+                    const formGroup = createElement('div', {
+                        class: "form-group btn-group btn-group-toggle",
+                        'data-toggle': "buttons",
+                    });
+                    const formGroup2 = createElement('div', {
+                        class: "form-group btn-group",
+                    });
+                    const btn0 = createElement('label', {
+                        class: `btn btn-secondary ${this.editorType === 'ocr_text' ? 'active' : ''}`,
+                        type: "radio",
+                        name: "options",
+                        title: 'Редактировать текст',
+                    }, null, [['input', {
+                        type: "radio",
+                        name: "options",
+                        checked: this.editorType === 'ocr_text'
+                    }], ['i', {class: 'fas fa-italic'}]]);
+                    const btn1 = createElement('label', {
+                        class: `btn btn-secondary ${this.editorType === 'ocr_ids' ? 'active' : ''}`,
+                        type: "radio",
+                        name: "options",
+                        title: 'Выбор словами',
+                    }, null, [['input', {
+                        type: "radio",
+                        name: "options",
+                        checked: this.editorType === 'ocr_ids'
+                    }], ['i', {class: 'fas fa-square'}]]);
+                    const btn2 = createElement('label', {
+                        class: "btn btn-secondary",
+                        type: "radio",
+                        name: "options",
+                        title: 'Выбор диапазоном',
+                    }, null, [['input', {type: "radio", name: "options",}], ['i', {class: 'fas fa-edit'}]]);
+                    const btn3 = createElement('button', {
+                        class: "btn btn-default",
+                        title: 'Отмена',
+                    }, null, [['i', {class: 'fas fa-times'}]]);
+                    const btn4 = createElement('button', {
+                        class: "btn btn-success",
+                        title: 'Сохранить',
+                    }, null, [['i', {class: 'fas fa-paper-plane'}]]);
+
+                    this.selectText = btn0;
+                    this.selectWords = btn1;
+                    this.selectRect = btn2;
+                    this.cancelAction = btn3;
+                    this.saveAction = btn4;
+
+                    this.tools = tools;
+
+                    tools.append(formGroup, formGroup2);
+                    formGroup.append(btn0, btn1, btn2);
+                    formGroup2.append(btn3, btn4);
+
+                    return tools;
+                }
+
+                init() {
+                    const editor = document.createElement("div");
+                    editor.classList.add('editor', 'field-editor');
+                    editor.dataset.type = this.editorType;
+                    editor.id = 'field-editor';
+                    editor.append(this.renderList(), this.renderTools());
+                    this.editor = editor;
+                    switch (this.editorType) {
+                        case "ocr_ids":
+                            this.onSelectWords();
+                            break;
+                        case "ocr_text":
+                            this.onSelectText();
+                            break;
+                        default:
+                            this.onSelectWords();
+                            break;
+                    }
+                    this.setListeners();
+                }
+
+                setListeners() {
+                    // Selection
+                    this.list.addEventListener('click', this.onWordRemoveClick);
+                    // Tools
+                    this.selectText.addEventListener('click', this.onSelectText);
+                    this.selectWords.addEventListener('click', this.onSelectWords);
+                    this.selectRect.addEventListener('click', this.onSelectRect);
+                    this.cancelAction.addEventListener('click', this.onCancelAction);
+                    this.saveAction.addEventListener('click', this.onSaveAction);
+                }
+
+                removeListeners() {
+                    // Selection
+                    this.list.removeEventListener('click', this.onWordRemoveClick);
+                    // Tools
+                    this.selectText.removeEventListener('click', this.onSelectText);
+                    this.selectWords.removeEventListener('click', this.onSelectWords);
+                    this.selectRect.removeEventListener('click', this.onSelectRect);
+                    this.cancelAction.removeEventListener('click', this.onCancelAction);
+                    this.saveAction.removeEventListener('click', this.onSaveAction);
+                }
+
+                onWordRemoveClick = (event) => {
+                    if (event.target?.dataset?.remove) {
+                        this.list.querySelector(`li[data-id="${event.target.dataset.id}"`).remove();
+                    }
+                }
+
+                setEditorType = (type) => {
+                    this.editor.dataset.type = type;
+                    this.editorType = type;
+                }
+
+                onSelectText = () => {
+                    cardBody.dataset.mode = 'select-text';
+                    this.setEditorType('ocr_text');
+                    setOcrCanvases(false);
+                    setOcrEditCanvases(false);
+                }
+
+                onSelectWords = () => {
+                    cardBody.dataset.mode = 'select-words';
+                    this.setEditorType('ocr_ids');
+                    setOcrCanvases(true);
+                    setOcrEditCanvases(false);
+                }
+
+                onSelectRect = () => {
+                    cardBody.dataset.mode = 'select-rect';
+                    this.setEditorType('ocr_ids');
+                    setOcrCanvases(true);
+                    setOcrEditCanvases(true);
+                }
+
+                onCancelAction = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.afterCancel();
+                }
+
+                getOrderedList = () => {
+                    return $(this.list).sortable("toArray", {attribute: 'data-id'}).map(item => +item);
+                }
+
+                getRemovedList = (ocrWordIds) => {
+                    return this.data.ocr_word_ids?.filter((oldWordId) => {
+                        return !ocrWordIds.includes(oldWordId);
+                    }) || [];
+                }
+
+                stopHighlightRemovedList(removedList) {
+                    removedList
+                        .map((wordId) => {
+                            return allWords.find(word => word.id === wordId);
+                        })
+                        .filter(x => x)
+                        .forEach(word => displayWord(word));
+                }
+
+                getOcrText = () => {
+                    return this.ocrTextArea.value;
+                }
+
+                onSaveAction = () => {
+                    const ocrWordIds = this.getOrderedList();
+                    const ocrText = this.getOcrText();
+                    const actionType = this.nlp_id === 'new' ? 'add' : 'edit';
+                    $.ajax({
+                        method: "POST",
+                        url: API[name]['nlp'][actionType],
+                        data: {
+                            doc_id: this.doc_id,
+                            attribute_id: this.attribute_id,
+                            nlp_id: this.nlp_id,
+                            ocr_word_ids: this.editorType === 'ocr_ids' ? ocrWordIds : null,
+                            ocr_text: this.editorType === 'ocr_text' ? ocrText : null
+                        },
+                        success: (res) => {
+                            if (this.nlp_id === 'new') {
+                                const newData = {...res};
+                                nlp_table.push(newData);
+                                this.data = newData;
+
+                            } else {
+                                if (this.editorType === 'ocr_ids') {
+                                    const removedItems = this.getRemovedList(ocrWordIds);
+                                    this.stopHighlightRemovedList(removedItems);
+                                    this.data.ocr_word_ids = ocrWordIds;
+                                } else if (this.editorType === 'ocr_text') {
+                                    this.data.ocr_text = ocrText;
+                                }
+
+                                if (this.data.status !== 4) {
+                                    this.data.status = 3;
+                                }
+                            }
+                            this.afterApply(this.data);
+                        },
+                        error: () => {
+                        },
+                    });
+                }
+
+                onSelect(mode, word_ids) {
+                    // console.log(mode, word_ids);
+                    let updatedList = [];
+                    if (mode === 'select-words') {
+                        const orderedList = this.getOrderedList();
+                        updatedList = [...orderedList, ...word_ids];
+                        // console.log(orderedList, updatedList);
+                    } else {
+                        updatedList = [...word_ids];
+                    }
+                    this.items = updatedList.map(item => +item);
+                    this.renderWords();
+                }
+
+                afterCancel() {
+                }
+
+                afterApply() {
+                }
+
+                destroy() {
+                    this.removeListeners();
+                    $(this.list).sortable("destroy");
+                    cardBody.dataset.mode = 'general';
+                }
+            }
+
+            window.fieldEditor = null;
+
+            Array.from(nlpEditableFields).forEach((field) => {
+                const clickHandler = (event) => {
+                    const nlp_id = field.id;
+                    const attribute_id = +field.dataset.attribute;
+                    const doc_id = nlp_json.document_id;
+                    const doc_class_id = nlp_json.doc_class_id;
+
+                    const textEl = field.getElementsByClassName('attr-text')[0]
+                    const editorEl = field.getElementsByClassName('attr-editor')[0];
+
+
+                    event.preventDefault();
+                    if (cardBody.dataset.mode !== 'general') {
+                        return;
+                    }
+                    textEl.classList.remove('active');
+                    editorEl.classList.add('active');
+                    const editor = new FieldEditor(nlp_id, attribute_id, doc_id, doc_class_id, name);
+                    window.fieldEditor = editor;
+                    const editorDestroy = () => {
+                        textEl.classList.add('active');
+                        editorEl.classList.remove('active');
+                        editor.destroy();
+                        window.fieldEditor = null;
+                        editorEl.textContent = "";
+                        field.addEventListener('click', clickHandler);
+                    }
+                    editor.afterApply = (attr) => {
+                        textEl.textContent = tableTools.getAttrValue(attr);
+                        field.id = attr.nlp_id;
+                        Array.from(nlpFields).forEach((nlpField) => {
+                            const nlpFieldId = nlpField.dataset.id;
+                            const attribute_id = +nlpField.dataset.attribute;
+                            if (nlpFieldId === 'new' && attribute_id === attr.attribute_id) {
+                                nlpField.dataset.status = attr.status;
+                                nlpField.dataset.id = attr.nlp_id;
+                                nlpField.dataset.attr = attr.nlp_id;
+                            } else if (nlpFieldId === nlp_id && attribute_id === attr.attribute_id) {
+                                nlpField.dataset.status = attr.status;
+                            }
+                        });
+                        nlpRects = getNlpRects();
+                        editorDestroy();
+                    };
+                    editor.afterCancel = () => {
+                        editorDestroy();
+                    }
+                    editorEl.appendChild(editor.editor);
+
+                    field.removeEventListener('click', clickHandler);
+                }
+                field.addEventListener('click', clickHandler);
+            })
+
+            function removeWordFromAllNlp(removedWordId) {
+                nlp_table.forEach((attr) => {
+                    const wordIds = attr.ocr_word_ids || [];
+                    if (wordIds.includes(removedWordId)) {
+                        wordIds.splice(wordIds.findIndex(wordId => wordId === removedWordId), 1);
+
+                        const nlp_id = attr.nlp_id;
+                        const field = Array.from(nlpEditableFields).find(f => +f.id === +nlp_id);
+                        const textEl = field.getElementsByClassName('attr-text')[0]
+                        textEl.textContent = tableTools.getAttrValue(attr);
+                    }
+                });
+                nlpRects = getNlpRects();
+            }
+
+
+            const canvasTooltip = document.getElementById('canvas-tooltip');
+            const canvasRemarker = document.getElementById('canvas-remarker');
+            const canvasChartToolbar = document.getElementById('canvas-chart-toolbar');
+
+            let addRow = document.getElementsByClassName('add-row')[0];
+            let addRowAttr = addRow?.getElementsByTagName('th')[0];
+
+            function addRowFocusOutHandler(e) {
+                const val = e.target.textContent;
+                if (val) {
+                    // swap
+
+                    const newTr = document.createElement("tr");
+                    newTr.classList.add('add-row');
+                    newTr.innerHTML = `<th scope="row" contenteditable="true" data-placeholder="Новый атрибут"></th>
+                                   <td contenteditable="true"></td>`;
+
+                    // replace
+                    addRow.classList.replace('add-row', 'new-field');
+                    addRowAttr.removeEventListener('focusout', addRowFocusOutHandler);
+
+                    addRow.after(newTr);
+
+                    addRow = newTr;
+                    addRowAttr = addRow.getElementsByTagName('th')[0];
+                    addRowAttr.addEventListener('focusout', addRowFocusOutHandler);
+                }
+            }
+
+            addRowAttr?.addEventListener('focusout', addRowFocusOutHandler);
+
+            function handlerMouseOver(e) {
+                const attr = upTo(e.target, 'tr')?.dataset.attr;
+                const words = getWordsByAttr(attr);
+                words.forEach(word => displayWord(word, true));
+            }
+
+            function handlerMouseOut(e) {
+                const attr = upTo(e.target, 'tr')?.dataset.attr;
+                const words = getWordsByAttr(attr);
+                words.forEach(word => displayWord(word));
+            }
+
+            Array.from(nlpFields).forEach(function (field) {
+                field.addEventListener('mouseover', handlerMouseOver);
+                field.addEventListener('mouseout', handlerMouseOut);
+            });
+
+            function getNlpIndexByNlpId(nlpId) {
+                return nlp_table.findIndex((attr) => attr.nlp_id.toString() === nlpId?.toString());
+            }
+
+            function getWordsByAttr(attr) {
+                let words = [];
+                const nlpIndex = getNlpIndexByNlpId(attr);
+                if (nlpIndex >= 0) {
+                    const wordIds = nlp_table[nlpIndex].ocr_word_ids || [];
+                    words = allWords.filter(word => wordIds.includes(word.id));
+                }
+                return words;
+            }
+
+            function displayWord(word, nlp) {
+                displayWordBackground(word, nlp);
+                displayWordBorder(word, nlp);
+            }
+
+            function displayWordBackground(word, nlp) {
+                const ctx = getCanvasContex(word.page_id);
+                const b = getBlockCoords(word);
+                const [ioctx, ratio, type] = ctx;
+
+                ioctx.fillStyle = 'rgb(0, 255, 0, 0.3)';
+                const m = 2 * ratio;
+                if (nlp) {
+                    ioctx.fillRect(b.x0 - m, b.y0 - m, b.x1 - b.x0 + 2 * m, b.y1 - b.y0 + 2 * m);
+                } else {
+                    ioctx.clearRect(b.x0 - m - 1, b.y0 - m - 1, b.x1 - b.x0 + 2 * m + 2, b.y1 - b.y0 + 2 * m + 2);
+                }
+            }
+
+            function displayWordBorder(word, nlp) {
+                const ctx = getCanvasContex(word.page_id);
+                const b = getBlockCoords(word);
+                const [ioctx, ratio, type] = ctx;
+
+                ioctx.lineWidth = type === 'words' ? 1 * ratio : 3 * ratio;
+                ioctx.strokeStyle = type === 'words'
+                    ? nlp
+                        ? 'green'
+                        : word.status === 2
+                            ? 'blue'
+                            : word.status === 3
+                                ? 'orange'
+                                : word.status === 4
+                                    ? 'purple'
+                                    : 'red'
+                    : !word.orientation
+                        ? 'green'
+                        : 'orange';
+
+                ioctx.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+            }
+
+            function clearWordBorder(word) {
+                const ctx = getCanvasContex(word.page_id);
+                const b = getBlockCoords(word);
+                const [ioctx, ratio, type] = ctx;
+                const m = 2 * ratio;
+                ioctx.lineWidth = type === 'words' ? 1 * ratio : 3 * ratio;
+                ioctx.clearRect(b.x0 - m - 1, b.y0 - m - 1, b.x1 - b.x0 + 2 * m + 2, b.y1 - b.y0 + 2 * m + 2);
+            }
+
+            function findPageIndex(pageId) {
+                return json_pages.findIndex(page => page.page_id === pageId);
+            }
+
+            function getCanvasContex(pageId) {
+                const pageIndex = findPageIndex(pageId);
+                const uiPageId = 'page_' + pageIndex;
+                const targetCanvas = ocrComponentWrapper.getElementsByClassName(uiPageId)[0];
+                const r = targetCanvas.getBoundingClientRect();
+                const ratio = parseInt(targetCanvas.getAttribute('width')) / r.width;
+                const context = targetCanvas.getContext('2d');
+
+                return [context, ratio, 'words'];
+            }
+
+            function getBlockCoords(block) {
+                return {
+                    x0: Math.min(block.x0, block.x1),
+                    y0: Math.min(block.y0, block.y1),
+                    x1: Math.max(block.x0, block.x1),
+                    y1: Math.max(block.y0, block.y1),
+                };
+            }
+
+            const chartEditorConfig = {
+                // Canvas initialization size
+                minWidth: 100,
+                minHeight: 100,
+                maxWidth: 500,
+                maxHeight: 500,
+            };
+            let chartEditor = null;
+
+            const remarkerSendButton = canvasRemarker.getElementsByClassName('send')[0];
+            remarkerSendButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                const ocr = canvasRemarker.dataset.ocr;
+                if (ocr !== name) {
+                    return;
+                }
+                const inputElement = canvasRemarker.getElementsByClassName('remarker-change')[0];
+                const user_text = inputElement.value;
+                const id = parseInt(canvasRemarker.dataset.id);
+                $.ajax({
+                    method: "POST",
+                    url: API[ocr].ocr.edit,
+                    data: {
+                        id,
+                        user_text,
+                    },
+                    success: function (data) {
+                        const pageId = parseInt(canvasRemarker.dataset.page_id);
+                        const pageIndex = findPageIndex(pageId);
+                        const words = json_pages[pageIndex].words_coordinates;
+                        const word = words.find(word => word.id === id);
+                        word.user_text = user_text;
+                        word.status = word.status === 4 ? 4 : 3;
+
+                        displayWord(word);
+                    },
+                    error: function (data) {
+                    }
+                });
+                canvasRemarker.classList.remove('active');
+            });
+            const remarkerRemoveButton = canvasRemarker.getElementsByClassName('remove')[0];
+            remarkerRemoveButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                const ocr = canvasRemarker.dataset.ocr;
+                if (ocr !== name) {
+                    return;
+                }
+                const id = parseInt(canvasRemarker.dataset.id);
+                $.ajax({
+                    method: "POST",
+                    url: API[name].ocr.remove,
+                    data: {
+                        ocr_id: id,
+                    },
+                    success: function (data) {
+                        const pageId = parseInt(canvasRemarker.dataset.page_id);
+                        const pageIndex = findPageIndex(pageId);
+                        const words = json_pages[pageIndex].words_coordinates;
+                        const removedWord = words.find((word) => word.id === id);
+                        words.splice(words.findIndex((word) => word.id === id), 1);
+                        allWords.splice(allWords.findIndex((word) => word.id === id), 1);
+                        clearWordBorder(removedWord);
+                        removeWordFromAllNlp(removedWord.id);
+                    },
+                    error: function (data) {
+                    }
+                });
+                canvasRemarker.classList.remove('active');
+            })
+
+            const chartEditButton = canvasChartToolbar.getElementsByClassName('edit')[0];
+            chartEditButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                const chart_link = canvasChartToolbar.dataset.value;
+                document.getElementById('target_rotate').src = chart_link;
+
+                chartEditor = new Darkroom('#target_rotate', chartEditorConfig);
+
+            })
+
+            function objectifyImage(src) {
+                const img_obj = new Image();
+                return img_obj;
+            }
+
+            function result(res, ioctx, ratio, type) {
+                res.forEach(function (w) {
+                    let b = {};
+                    if (type === 'charts') {
+                        b = {
+                            x0: w.upper_left_x,
+                            y0: w.upper_left_y,
+                            x1: w.lower_right_x,
+                            y1: w.lower_right_y,
+                        };
+                    } else {
+                        b = {
+                            x0: w.x0,
+                            y0: w.y0,
+                            x1: w.x1,
+                            y1: w.y1,
+                        };
+                    }
+
+                    ioctx.lineWidth = type === 'words' ? 1 * ratio : 3 * ratio;
+                    ioctx.strokeStyle = type === 'words'
+                        ? w.status === 2
+                            ? 'blue'
+                            : w.status === 3
+                                ? 'orange'
+                                : w.status === 4
+                                    ? 'purple'
+                                    : 'red'
+                        : !w.orientation
+                            ? 'green'
+                            : 'orange';
+                    ioctx.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0)
+                })
+            }
+
+            function handleMouseEvent(e) {
+                // tell the browser we're handling this event
+                e.preventDefault();
+                e.stopPropagation();
+                const eventType = e.type;
+                const targetCanvas = e.target;
+                const r = targetCanvas.getBoundingClientRect();
+                const canvasId = targetCanvas.id;
+                const canvasIndex = canvasId.split('_')[1];
+                const canvasWords = json_pages[canvasIndex].words_coordinates;
+                const canvasCharts = json_pages[canvasIndex].charts;
+                const page_id = json_pages[canvasIndex].page_id;
+
+                const absPosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+
+                const ratio = targetCanvas.getAttribute('width') / r.width;
+
+                const canvasPosition = {
+                    x: (e.clientX - r.left) * ratio,
+                    y: (e.clientY - r.top) * ratio
+                };
+
+                let showCanvasChartToolbar = false;
+
+                for (let i = 0, len = canvasCharts.length; i < len; i++) {
+                    const chart = canvasCharts[i];
+
+                    const chartRect = {
+                        x: chart.upper_left_x,
+                        y: chart.upper_left_y,
+                        x1: chart.lower_right_x,
+                        y1: chart.lower_right_y,
+                        value: chart.chart_link,
+                        orientation: chart.orientation,
+                    }
+                    if (canvasPosition.x > chartRect.x &&
+                        canvasPosition.y > chartRect.y &&
+                        canvasPosition.x < chartRect.x1 &&
+                        canvasPosition.y < chartRect.y1) {
+
+                        canvasChartToolbar.dataset.x = chartRect.x;
+                        canvasChartToolbar.dataset.y = chartRect.y;
+                        canvasChartToolbar.dataset.x1 = chartRect.x1;
+                        canvasChartToolbar.dataset.y1 = chartRect.y1;
+                        canvasChartToolbar.dataset.value = chartRect.value;
+
+                        canvasChartToolbar.style.left = chartRect.x1 / ratio + r.left - 80 + "px";
+                        canvasChartToolbar.style.top = chartRect.y1 / ratio + r.top - 60 + "px";
+
+                        canvasChartToolbar.getElementsByClassName('download')[0].href = chartRect.value;
+                        canvasChartToolbar.getElementsByClassName('edit')[0].dataset.src = chartRect.value;
+                        canvasChartToolbar.classList.add('active');
+                        showCanvasChartToolbar = true;
+                    }
+                }
+                if (!showCanvasChartToolbar)
+                    canvasChartToolbar.classList.remove('active');
+
+                const nlpOcrs = nlpRects.filter(rect => {
+                    return (
+                        rect.page_id === page_id &&
+                        canvasPosition.x >= rect.x0 &&
+                        canvasPosition.y >= rect.y0 &&
+                        canvasPosition.x <= rect.x1 &&
+                        canvasPosition.y <= rect.y1
+                    );
+                });
+                const nlpOcrsIds = nlpOcrs.map(nlpOcr => nlpOcr.nlp_id);
+
+                if (nlpOcrs.length) {
+                    Array.from(nlpFields).forEach(field => {
+                        const attr = field.dataset.attr;
+                        if (nlpOcrsIds.includes(attr)) {
+                            field.classList.add('over-ocr');
+
+                            const words = getWordsByAttr(attr);
+                            words.forEach(word => displayWordBackground(word));
+                            words.forEach(word => displayWord(word, true));
+                        }
+                    })
+                } else {
+                    Array.from(nlpFields).forEach(field => {
+                        field.classList.remove('over-ocr')
+
+                        const attr = field.dataset.attr;
+                        const words = getWordsByAttr(attr);
+                        words.forEach(word => displayWord(word));
+                    });
+                }
+
+
+                if (canvasTooltip.classList.contains('active')) {
+                    const tooltipRect = {
+                        x: canvasTooltip.dataset.x,
+                        y: canvasTooltip.dataset.y,
+                        x1: canvasTooltip.dataset.x1,
+                        y1: canvasTooltip.dataset.y1,
+                        value: canvasTooltip.dataset.value,
+                        usertext: canvasTooltip.dataset.usertext,
+                        id: canvasTooltip.dataset.id,
+                        page_id: canvasTooltip.dataset.page_id,
+                        status: canvasTooltip.dataset.status,
+                    }
+                    if (canvasPosition.x > tooltipRect.x &&
+                        canvasPosition.y > tooltipRect.y &&
+                        canvasPosition.x < tooltipRect.x1 &&
+                        canvasPosition.y < tooltipRect.y1) {
+                        if (eventType === "click") {
+                            if (cardBody.dataset.mode === 'select-words') {
+                                window?.fieldEditor?.onSelect(
+                                    cardBody.dataset.mode,
+                                    [tooltipRect.id],
+                                )
+                                return;
+                            }
+                            canvasRemarker.getElementsByClassName('remarker-origin')[0].innerHTML = tooltipRect.value;
+                            canvasRemarker.getElementsByClassName('remarker-change')[0].value = tooltipRect.usertext || tooltipRect.value;
+                            canvasRemarker.dataset.x = tooltipRect.x;
+                            canvasRemarker.dataset.y = tooltipRect.y;
+                            canvasRemarker.dataset.x1 = tooltipRect.x1;
+                            canvasRemarker.dataset.y1 = tooltipRect.y1;
+                            canvasRemarker.dataset.value = tooltipRect.value;
+                            canvasRemarker.dataset.usertext = tooltipRect.usertext;
+                            canvasRemarker.dataset.id = tooltipRect.id;
+                            canvasRemarker.dataset.page_id = tooltipRect.page_id;
+                            canvasRemarker.dataset.status = tooltipRect.status;
+                            canvasRemarker.dataset.ocr = name;
+                            canvasTooltip.classList.remove('active');
+
+                            canvasRemarker.style.left = absPosition.x + 20 + "px";
+                            canvasRemarker.style.top = absPosition.y - 60 + "px";
+                            canvasRemarker.classList.add('active');
+                            return;
+                        } else {
+                            canvasTooltip.style.left = absPosition.x + 20 + "px";
+                            canvasTooltip.style.top = absPosition.y - 60 + "px";
+                            return;
+                        }
+                    }
+
+                } else if (canvasRemarker.classList.contains('active')) {
+                    // do nothing
+                    if (eventType === "click") {
+                        canvasRemarker.classList.remove('active');
+                    } else {
+                        return;
+                    }
+                }
+
+                // find and set tooltip active
+
+                for (let i = 0, len = canvasWords.length; i < len; i++) {
+                    const word = canvasWords[i];
+
+                    const tempWord = {
+                        x0: Math.min(word.x0, word.x1),
+                        x1: Math.max(word.x0, word.x1),
+                        y0: Math.min(word.y0, word.y1),
+                        y1: Math.max(word.y0, word.y1),
+                    };
+
+                    const wordRect = {
+                        x: tempWord.x0,
+                        y: tempWord.y0,
+                        x1: tempWord.x1,
+                        y1: tempWord.y1,
+                        value: word.ocr_text,
+                        usertext: word.user_text || word.ocr_text,
+                        id: word.id,
+                        page_id: word.page_id,
+                        status: word.status,
+                    }
+
+                    if (canvasPosition.x > wordRect.x &&
+                        canvasPosition.y > wordRect.y &&
+                        canvasPosition.x < wordRect.x1 &&
+                        canvasPosition.y < wordRect.y1) {
+
+
+                        if (eventType === "click") {
+                            if (cardBody.dataset.mode === 'select-words') {
+                                window?.fieldEditor?.onSelect(
+                                    cardBody.dataset.mode,
+                                    [wordRect.id],
+                                )
+                                return;
+                            }
+                            canvasRemarker.getElementsByClassName('remarker-origin')[0].innerHTML = wordRect.value;
+                            canvasRemarker.getElementsByClassName('remarker-change')[0].value = wordRect.usertext || wordRect.value;
+                            canvasRemarker.dataset.x = wordRect.x;
+                            canvasRemarker.dataset.y = wordRect.y;
+                            canvasRemarker.dataset.x1 = wordRect.x1;
+                            canvasRemarker.dataset.y1 = wordRect.y1;
+                            canvasRemarker.dataset.value = wordRect.value || '';
+                            canvasRemarker.dataset.usertext = wordRect.usertext;
+                            canvasRemarker.dataset.id = wordRect.id;
+                            canvasRemarker.dataset.page_id = wordRect.page_id;
+                            canvasRemarker.dataset.status = wordRect.status;
+                            canvasRemarker.dataset.ocr = name;
+                            canvasTooltip.classList.remove('active');
+
+                            canvasRemarker.style.left = absPosition.x + 20 + "px";
+                            canvasRemarker.style.top = absPosition.y - 60 + "px";
+                            canvasRemarker.classList.add('active');
+                            return;
+                        } else {
+                            canvasTooltip.dataset.x = wordRect.x;
+                            canvasTooltip.dataset.y = wordRect.y;
+                            canvasTooltip.dataset.x1 = wordRect.x1;
+                            canvasTooltip.dataset.y1 = wordRect.y1;
+                            canvasTooltip.dataset.value = wordRect.value || '';
+                            canvasTooltip.dataset.usertext = wordRect.usertext;
+                            canvasTooltip.dataset.id = wordRect.id;
+                            canvasTooltip.dataset.page_id = wordRect.page_id;
+                            canvasTooltip.dataset.status = wordRect.status;
+                            canvasTooltip.dataset.ocr = name;
+
+                            canvasTooltip.style.left = absPosition.x + 20 + "px";
+                            canvasTooltip.style.top = absPosition.y - 60 + "px";
+                            if (wordRect.status === 2) {
+                                canvasTooltip.innerHTML = wordRect.value;
+                                canvasTooltip.classList.remove('usertext');
+                            } else {
+                                canvasTooltip.innerHTML = wordRect.usertext;
+                                canvasTooltip.classList.add('usertext');
+                            }
+                            canvasTooltip.classList.add('active');
+                        }
+                        return;
+                    }
+                }
+
+                canvasTooltip.classList.remove('active')
+            }
+
+            // class Canvas {
+            //     constructor() {
+            //     }
+            // }
+
+            class Popup {
+                constructor() {
+                    this.init();
+                }
+
+                init() {
+                    const newOcrPopup = document.createElement("div");
+                    newOcrPopup.classList.add('canvas-remarker', 'row');
+                    const newOcrInput = document.createElement("input");
+                    newOcrInput.classList.add('remarker-change');
+                    const newOcrSubmit = document.createElement("button");
+                    newOcrSubmit.classList.add('remarker-send');
+                    newOcrSubmit.setAttribute('type', 'submit');
+                    const newOcrSubmitIcon = document.createElement("i");
+                    newOcrSubmit.classList.add('fas', 'fa-paper-plane');
+                    newOcrSubmit.appendChild(newOcrSubmitIcon);
+                    newOcrPopup.appendChild(newOcrInput);
+                    newOcrPopup.appendChild(newOcrSubmit);
+                    this.popup = newOcrPopup;
+                    this.popupInput = newOcrInput;
+                    this.popupSubmitButton = newOcrSubmit;
+
+                    this.setListeners();
+                }
+
+
+                setListeners() {
+                    this.popupSubmitButton.addEventListener('click', this.onSubmit);
+                };
+
+                afterSend(newOcr) {
+                }
+
+                onSuccess = (data) => {
+                    const newOcr = {
+                        ...this.getData(),
+                        user_text: this.user_text,
+                        ocr_text: null,
+                        status: data.status,
+                        id: data.ocr_id,
+                    };
+
+                    // console.log({
+                    //     data,
+                    //     'getData': this.getData()
+                    // })
+
+                    json_pages.forEach((page) => {
+                        if (page.page_id === newOcr.page_id) {
+                            page.words_coordinates.push(newOcr);
+                        }
+                    });
+                    allWords.push(newOcr);
+                    this.afterSend(newOcr);
+                }
+
+                onError(data) {
+                }
+
+                getData() {
+                    return this.data;
+                }
+
+                setSubmit(user_text) {
+                    this.user_text = user_text;
+                    $.ajax({
+                        method: "POST",
+                        url: API[name].ocr.add,
+                        data: {
+                            user_text,
+                            ...this.getData()
+                        },
+                        success: this.onSuccess,
+                        error: this.onError,
+                    });
+                }
+
+                onSubmit = (event) => {
+                    event.preventDefault();
+                    const user_text = this.popupInput.value;
+                    this.setSubmit(user_text);
+                    this.hide();
+                }
+
+                show(absPosition, data) {
+                    this.data = data;
+                    this.popup.style.left = absPosition.x + 20 + "px";
+                    this.popup.style.top = absPosition.y - 60 + "px";
+                    this.popup.classList.add('active');
+                }
+
+                hide() {
+                    this.popup.classList.remove('active');
+                    this.popupInput.value = '';
+                }
+            }
+
+            class EditCanvas {
+                constructor(canvasId, canvasOcr, width, height, newOcrPopup, pageId, documentId) {
+                    this.canvasId = canvasId;
+                    this.width = width;
+                    this.height = height;
+                    this.canvasOcr = canvasOcr;
+                    this.newOcrPopup = newOcrPopup;
+                    this.pageId = pageId;
+                    this.documentId = documentId;
+                    this.init();
+                }
+
+                state = {
+                    mousedown: false,
+                    mousemove: false,
+                    dnd: false,
+                    startPos: {
+                        x: null,
+                        y: null,
+                    },
+                    isEditing: false,
+                    editRect: {
+                        x: null,
+                        y: null,
+                        w: 0,
+                        h: 0,
+                    },
+                }
+
+                init() {
+                    this.canvas = document.createElement("canvas");
+                    this.canvas.classList.add(
+                        'edit-canvas',
+                        // 'hidden-canvas'
+                    );
+                    this.canvas.id = this.canvasId;
+                    this.context = this.canvas.getContext('2d');
+                    this.updateSize(this.width, this.height);
+
+                    this.setListeners();
+                }
+
+                setListeners() {
+                    this.canvas.addEventListener('mousedown', this.onMouseDown);
+                    this.canvas.addEventListener('mousemove', this.onMouseMove);
+                    this.canvas.addEventListener('mouseup', this.onMouseUp);
+                    this.canvas.addEventListener('click', this.onMouseClick);
+                    this.newOcrPopup.afterSend = this.afterSend;
+                }
+
+                removeListeners() {
+                    this.canvas.removeEventListener('mousedown', this.onMouseDown);
+                    this.canvas.removeEventListener('mousemove', this.onMouseMove);
+                    this.canvas.removeEventListener('mouseup', this.onMouseUp);
+                    this.canvas.removeEventListener('click', this.onMouseClick);
+                }
+
+                afterSend = (newWord) => {
+                    this.clearRect();
+                    displayWord(newWord);
+                }
+
+                updateSize(width, height) {
+                    this.canvas.width = this.width = width;
+                    this.canvas.height = this.height = height;
+                    this.updateRatio();
+                }
+
+                updateRatio() {
+                    const r = this.canvas.getBoundingClientRect();
+                    this.ratio = this.canvas.width / r.width;
+                    this.offset = {
+                        left: r.left,
+                        top: r.top,
+                    };
+                }
+
+                getMousePosition(e) {
+                    this.updateRatio();
+                    const absPosition = {
+                        x: e.clientX,
+                        y: e.clientY,
+                    };
+
+                    const canvasPosition = {
+                        x: (e.clientX - this.offset.left) * this.ratio,
+                        y: (e.clientY - this.offset.top) * this.ratio,
+                    };
+
+                    return {
+                        abs: absPosition,
+                        canvas: canvasPosition,
+                        offset: this.offset,
+                    };
+                }
+
+                onMouseDown = (event) => {
+                    const state = this.state;
+                    const mousePos = this.getMousePosition(event);
+
+                    if (this.isPointInsideRect(mousePos.canvas, state.editRect)) {
+                        if (state.isEditing || cardBody.dataset.mode === 'select-rect') {
+                            state.dnd = true;
+                            state.startPos = {...mousePos.canvas};
+                        }
+                    } else {
+                        state.isEditing = false;
+                        state.mousedown = true;
+                        this.newOcrPopup.hide();
+                        this.clearRect();
+                        state.startPos = {...mousePos.canvas};
+                        state.editRect = {...mousePos.canvas};
+                    }
+                }
+
+                onMouseMove = (event) => {
+                    const state = this.state;
+                    const mousePos = this.getMousePosition(event);
+
+                    if (state.dnd) {
+                        this.clearRect(state.editRect);
+                        state.editRect = {
+                            ...state.editRect,
+                            x: state.editRect.x + (mousePos.canvas.x - state.startPos.x),
+                            y: state.editRect.y + (mousePos.canvas.y - state.startPos.y),
+                        };
+                        state.startPos = {...mousePos.canvas};
+
+                        if (cardBody.dataset.mode === 'select-rect') {
+                            this.drawIntersectWords(this.getEditRect());
+                        }
+
+                        this.drawRect(state.editRect);
+                    } else if (state.mousedown) {
+                        this.clearRect(state.editRect);
+                        state.editRect.w = mousePos.canvas.x - state.editRect.x;
+                        state.editRect.h = mousePos.canvas.y - state.editRect.y;
+
+
+                        if (!state.mousemove && (state.editRect.w >= 10 || state.editRect.h >= 10)) {
+                            state.mousemove = true;
+                        }
+
+                        if (cardBody.dataset.mode === 'select-rect') {
+                            this.drawIntersectWords(this.getEditRect());
+                        }
+
+                        this.drawRect(state.editRect);
+                    }
+                }
+
+                filterIntersectWords = (rect) => {
+                    return json_pages
+                        .find((page) => page.page_id === this.pageId)
+                        .words_coordinates
+                        .filter((word) => this.isIntersectedRects(rect, word))
+                }
+
+                drawIntersectWords = (rect) => {
+                    this.filterIntersectWords(rect)
+                        .forEach((word) => {
+                            this.drawRect({
+                                x: word.x0,
+                                y: word.y0,
+                                w: word.x1 - word.x0,
+                                h: word.y1 - word.y0,
+                            }, 1, '#FF9C33');
+                        })
+                    ;
+
+                }
+
+                isIntersectedRects = (rect1, rect2) => {
+                    const rectA = {
+                        rx: (rect1.x1 - rect1.x0) / 2,
+                        ry: (rect1.y1 - rect1.y0) / 2,
+                    };
+                    rectA.midx = (rect1.x0 + rectA.rx);
+                    rectA.midy = (rect1.y0 + rectA.ry);
+
+                    const rectB = {
+                        rx: (rect2.x1 - rect2.x0) / 2,
+                        ry: (rect2.y1 - rect2.y0) / 2,
+                    };
+                    rectB.midx = (rect2.x0 + rectB.rx);
+                    rectB.midy = (rect2.y0 + rectB.ry);
+
+                    const midDist = {
+                        x: Math.abs(rectA.midx - rectB.midx),
+                        y: Math.abs(rectA.midy - rectB.midy),
+                        rx: Math.abs(rectA.rx + rectB.rx),
+                        ry: Math.abs(rectA.ry + rectB.ry),
+                    };
+                    return (midDist.x <= midDist.rx) && (midDist.y <= midDist.ry);
+                }
+
+                getEditRect = () => {
+                    const editRect = this.state.editRect;
+                    const
+                        x0 = Math.round(editRect.x),
+                        y0 = Math.round(editRect.y),
+                        x1 = Math.round(editRect.x + editRect.w),
+                        y1 = Math.round(editRect.y + editRect.h);
+
+                    return {
+                        x0: Math.min(x0, x1),
+                        y0: Math.min(y0, y1),
+                        x1: Math.max(x0, x1),
+                        y1: Math.max(y0, y1),
+                    }
+                }
+
+                sortWordsByPosition(word1, word2) {
+                    // by y then by x
+                    let result = 0;
+                    if (
+                        ((word1.y1 + word1.y0) / 2) < word2.y0
+                        ||
+                        (
+                            !(((word2.y1 + word2.y0) / 2) < word1.y0)
+                            &&
+                            ((word1.x1 + word1.x0) / 2) < word2.x0
+                            &&
+                            (word1.x1 < word2.x1)
+                        )
+                    ) result = -1
+                    else if (
+                        ((word2.y1 + word2.y0) / 2) < word1.y0
+                        ||
+                        (
+                            !(((word1.y1 + word1.y0) / 2) < word2.y0)
+                            &&
+                            ((word2.x1 + word2.x0) / 2) < word1.x0
+                            &&
+                            (word2.x1 < word1.x1)
+                        )
+                    ) result = 1;
+                    return result;
+                }
+
+                onMouseUp = (event) => {
+                    const state = this.state;
+                    const mousePos = this.getMousePosition(event);
+
+
+                    if (cardBody.dataset.mode === 'select-rect') {
+                        const words = this.filterIntersectWords(this.getEditRect());
+                        const wordsIds = words.sort(this.sortWordsByPosition).map(word => word.id);
+                        window?.fieldEditor?.onSelect(
+                            cardBody.dataset.mode,
+                            wordsIds,
+                        )
+                    } else if (state.dnd || state.mousemove) {
+                        state.isEditing = true;
+
+                        const data = {
+                            ...this.getEditRect(),
+                            page_id: this.pageId,
+                            doc_id: this.documentId,
+                        };
+
+                        // open popup;
+                        this.newOcrPopup.show(mousePos.abs, data)
+                    }
+
+                    state.dnd = false;
+                    state.mousedown = false;
+                    state.mousemove = false;
+                }
+
+                onMouseClick = (event) => {
+                    event.preventDefault();
+                }
+
+                clearRect() {
+                    this.context.clearRect(
+                        0,
+                        0,
+                        this.width,
+                        this.height,
+                    );
+                }
+
+                drawRect(rect, lineWidth = 1, strokeStyles = 'green') {
+                    this.context.lineWidth = lineWidth * this.ratio;
+                    this.context.strokeStyle = strokeStyles;
+
+                    this.context.strokeRect(
+                        rect.x,
+                        rect.y,
+                        rect.w,
+                        rect.h,
+                    );
+                }
+
+                isPointInsideRect(point, rect) {
+                    return (
+                        point.x >= rect.x &&
+                        point.x <= rect.x + rect.w &&
+                        point.y >= rect.y &&
+                        point.y <= rect.y + rect.h
+                    );
+                }
+            }
+
+            class Page {
+                constructor(page, index) {
+                    this.page_id = page.page_id;
+                    this.index = index;
+                    this.data = page;
+                    // this.init();
+                }
+            }
+
+            class PageStore {
+                constructor(document_id) {
+                    this.document_id = document_id;
+                    this.pages = {};
+                }
+
+                addPage(page, index) {
+                    this.pages[page.page_id] = new Page(page, index);
+                }
+            }
+
+            const documentId = nlp_json.document_id;
+
+            const pageStore = new PageStore(documentId);
+            const modalsDiv = document.getElementById('modals');
+
+            if (Array.isArray(json_pages)) {
+                json_pages.forEach(function (page, index) {
+                    // pageStore.addPage(page, index);
+
+                    const pageIndex = `page_${index}`;
+                    const newDiv = document.createElement("div");
+                    newDiv.classList.add('page-wrapper');
+                    newDiv.dataset.page = page.page_id;
+                    const pageCanvas = document.createElement("canvas");
+                    pageCanvas.classList.add('ocr-canvas', pageIndex);
+                    pageCanvas.dataset.page = page.page_id;
+                    pageCanvas.id = pageIndex;
+                    pageCanvas.width = 1000;
+                    pageCanvas.height = 768;
+                    // pageCanvas.style.position = "absolute";
+                    // newDiv.style.border = "1px solid";
+                    // events for canvaspage-wrapper
+                    pageCanvas.addEventListener("mousemove", handleMouseEvent);
+                    pageCanvas.addEventListener("click", handleMouseEvent);
+                    newDiv.appendChild(pageCanvas);
+
+                    const newOcrPopup = new Popup();
+                    const pageCanvasEdit = new EditCanvas(
+                        pageIndex + '_edit', pageCanvas, 1000, 768,
+                        newOcrPopup, page.page_id, documentId,
+                    );
+                    newDiv.appendChild(pageCanvasEdit.canvas);
+                    modalsDiv.appendChild(newOcrPopup.popup);
+
+                    const context = pageCanvas.getContext('2d');
+
+                    const i = objectifyImage(page.page_link_local);
+                    i.onload = function () {
+                        pageCanvas.width = i.width;
+                        pageCanvas.height = i.height;
+
+                        pageCanvasEdit.updateSize(i.width, i.height);
+
+                        const r = pageCanvas.getBoundingClientRect();
+                        const ratio = pageCanvas.getAttribute('width') / r.width;
+
+                        newDiv.dataset.ratio = ratio;
+
+                        result(page.words_coordinates, context, ratio, 'words');
+
+                        result(page.charts, context, ratio, 'charts');
+
+                        // const pagesTop = pagesWrapper.scrollTop;
+                        // const pageTop = +(getPageWrapper(activePageId)?.offsetTop || 0);
+                        // const offsetTop = pagesTop - pageTop;
+                        // console.log(offsetTop, pagesTop, pageTop);
+
+                        newDiv.appendChild(i);
+                        if (cardBody.dataset.ocr === name && !!activePageId) {
+                            scrollToPage(activePageId, 0);
+                        }
+                    };
+                    if (index < 2 || activePageId === page.page_id) {
+                        i.src = page.page_link_local;
+                    } else {
+                        setTimeout(() => {
+                            i.src = page.page_link_local;
+                        }, 0);
+                    }
+                    pagesWrapper.appendChild(newDiv);
+                });
+            }
+            return ocrComponentWrapper;
+        }
+
+    </script>
+
+{% endblock %}

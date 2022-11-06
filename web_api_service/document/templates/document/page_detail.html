@@ -1,0 +1,76 @@
+{% extends "document/base_document.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load i18n %}
+
+{% block page_title %}
+
+{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard_url' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item"><a
+                href="{% url 'document_detail_url' page.document.id page_id=0 %}">{% trans "Document detail" %}</a></li>
+        <li class="breadcrumb-item active">{% trans "Page detail" %}</li>
+    </ol>
+{% endblock %}
+
+{% block style %}
+
+    <style>
+        .fit-image {
+            width: 100%;
+            object-fit: cover;
+            /*height: 300px;  only if you want fixed height */
+        }
+    </style>
+
+{% endblock %}
+
+{% block tree_view %}
+
+    {% include 'document/includes/tree_view_menu.html' %}
+
+{% endblock %}
+
+{% block content %}
+
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{% trans "Page detail" %}</h3>
+
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div id="add_loading_icon" class="lds-dual-ring " style="position: absolute; z-index: 1000"></div>
+
+                </div>
+                <div class="col-md-6">
+
+                    <img src="{{ page.page_thumbnail.url }}" class="img-responsive fit-image" alt="">
+
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.card-body -->
+
+        <!-- /.footer -->
+    </div>
+    <!-- /.card -->
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}

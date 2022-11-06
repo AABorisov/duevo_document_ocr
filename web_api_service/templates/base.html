@@ -1,0 +1,313 @@
+{% load i18n %}
+{% load static %}
+{% load account_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>
+
+        {% block title %}
+            {% if title %}
+                {% trans "Document Processing" %} - {{ title }}
+            {% else %}
+                {% trans "Document Processing" %}
+            {% endif %}
+        {% endblock %}
+
+    </title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <link rel="shortcut icon" href="{% static 'images/logo/doc_logo2.png' %}" type="image/png">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'adminlte/css/fontawesome.min.css' %}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="{% static 'adminlte/css/ionicons.min.css' %}">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="{% static 'adminlte/css/toastr.min.css' %}">
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'admin/css/vendor/select2/select2.min.css' %}">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="{% static 'adminlte/css/adminlte.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    {#    <link rel="stylesheet" href="{% static 'css/main.css' %}">#}
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+
+    <style>
+        .ui-autocomplete {
+            padding-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+            /* prevent horizontal scrollbar */
+            overflow-x: hidden;
+            /* add padding to account for vertical scrollbar */
+            padding-right: 20px;
+        }
+    </style>
+
+    {% block style %}
+
+    {% endblock %}
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed ">
+<!-- Site wrapper -->
+<div class="wrapper">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+            </li>
+
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="#" class="nav-link">{% trans "Contact" %}</a>
+            </li>
+        </ul>
+
+        <!-- SEARCH FORM -->
+        <form class="form-inline ml-3">
+            <div class="input-group input-group-sm">
+
+                <input class="form-control form-control-navbar" id="global_search" name="global_search" type="search"
+                       placeholder="{% trans "Search" %}"
+                       aria-label="Search">
+
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+
+            </div>
+        </form>
+
+        <!-- Right navbar links -->
+        <ul class="navbar-nav ml-auto">
+            {% get_current_language as LANGUAGE_CODE %}
+            <form action="{% url 'set_language' %}" method="post" class="form-inline ml-2">
+                {% csrf_token %}
+
+                <input type="hidden" name="next" value="{{ redirect_to }}" class="form-control">
+                {% if LANGUAGE_CODE == 'en' %}
+                    <input type="hidden" name="language" value="ru" class="form-control">
+                    <input type="image" name="Set" value="Set" alt="blue"
+                           src="{% static 'images/flags/united-kingdom-flag-icon-32.png' %}">
+                {% else %}
+                    <input type="hidden" name="language" value="en" class="form-control">
+                    <input type="image" name="Set" value="Set" alt="blue"
+                           src="{% static 'images/flags/russia-flag-icon-32.png' %}">
+                {% endif %}
+
+            </form>
+
+            <li class="nav-item dropdown user-menu">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+
+                    <img src="{{ user|get_user_image }}" class="user-image img-circle elevation-2"
+                         alt="{% trans "User Image" %}">
+
+                    <span class="d-none d-md-inline">{{ user|get_full_name }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <!-- User image -->
+                    <li class="user-header bg-primary">
+                        <img src="{{ user|get_user_image }}" class="img-circle elevation-2" alt="User Image">
+
+                        <p>
+                            {{ user|get_full_name }}
+                            <small>{% trans "Member since" %} {{ user.date_joined.date }}</small>
+                        </p>
+                    </li>
+                    <!-- Menu Body -->
+                    <!-- Menu Footer-->
+                    <li class="user-footer">
+                        <a href="{% url 'profile_url' %}" class="btn btn-default btn-flat">{% trans "Profile" %}</a>
+                        <a href="{% url 'logout_url' %}"
+                           class="btn btn-default btn-flat float-right">{% trans "Logout" %}</a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+                    <i class="fas fa-th-large"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <!-- /.navbar -->
+
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="{% url 'main_page_url' %}" class="brand-link">
+            <img src="{% static 'images/logo/doc_logo2.png' %}"
+                 alt="{% trans "Document Processing" %}"
+                 class="brand-image img-circle elevation-3"
+                 style="opacity: .8">
+            <span class="brand-text font-weight-light">{% trans "Document Processing" %}</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu"
+                    data-accordion="false">
+                    <!-- Add icons to the links using the .nav-icon class
+                         with font-awesome or any other icon font library -->
+                    {% block sidebar %}
+
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard_url' %}"
+                               class="nav-link {% if navbar == 'navbar_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-th"></i>
+                                <p>
+                                    {% trans "Dashboard" %}
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'file_upload_url' %}"
+                               class="nav-link {% if navbar == 'navbar_document_upload' %}active{% endif %}">
+                                <i class="nav-icon fas fas fa-upload"></i>
+                                <p>
+                                    {% trans "Upload files" %}
+                                </p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'schema-swagger-ui' %}"
+                               class="nav-link ">
+                                <i class="nav-icon fas fas fa-code"></i>
+                                <p>
+                                    {% trans "Swagger" %}
+                                </p>
+                            </a>
+                        </li>
+
+                    {% endblock %}
+
+                    {% block tree_view %}
+
+                    {% endblock %}
+
+                </ul>
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+
+        <!-- Content Header (Page header)-->
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+
+                    <div class="col-sm-6">
+                        {% block page_title %}
+
+                        {% endblock %}
+                    </div>
+
+                    <div class="col-sm-6">
+                        {% block breadcrumb %}
+
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+
+            {% block content %}
+
+            {% endblock %}
+
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <footer class="main-footer">
+        <div class="float-right d-none d-sm-block">
+            <b>{% trans "Version" %}</b> 1
+        </div>
+        <strong><a href="#">{% trans "DuEva" %}</a>.</strong> {% trans "All rights reserved." %}
+    </footer>
+
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+    </aside>
+    <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="{% static 'js/jquery-3.5.1.min.js' %}"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'bootstrap-4.5.0-dist/js/bootstrap.bundle.min.js' %}"></script>
+<!-- Toastr js -->
+<script src="{% static 'toastr/toastr.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'adminlte/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'adminlte/js/demo.js' %}"></script>
+<!-- Chart JS -->
+<script src="{% static 'js/Chart.min.js' %}"></script>
+
+<script>
+
+    $(document).ready(function () {
+        $('#global_search').autocomplete({
+            source: "{% url 'ajax_global_search_url' %}",
+            minLength: 2,
+            select: function (event, ui) {
+                console.log( ui.item.ocr_text)
+
+                $(event.target).val(ui.item.ocr_text);
+                window.location.href = ui.item.value;
+                return false;
+
+            }
+        });
+
+    });
+
+</script>
+
+<script>
+
+    {% if messages %}
+        {% for message in messages %}
+            toastr.{{ message.tags }}('{{ message }}');
+        {% endfor %}
+    {% endif %}
+</script>
+
+{% block script %}
+
+
+
+{% endblock %}
+</body>
+</html>

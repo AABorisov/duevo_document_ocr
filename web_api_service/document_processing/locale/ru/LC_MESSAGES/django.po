@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-11-22 17:53+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: document_processing/constants.py:5
+msgid "Male"
+msgstr "Мужской"
+
+#: document_processing/constants.py:6
+msgid "Female"
+msgstr "Женский"
+
+#: document_processing/constants.py:7
+msgid "Other"
+msgstr "Другое"
+
+#: document_processing/constants.py:11
+msgid "Not recognized"
+msgstr "Не распознан"
+
+#: document_processing/constants.py:12
+msgid "Recognized"
+msgstr "Распознан"
+
+#: document_processing/constants.py:13
+msgid "Operator recognized"
+msgstr "Распознан оператором"
+
+#: document_processing/constants.py:14
+msgid "Operator add attribute with word ids"
+msgstr ""
+
+#: document_processing/constants.py:15
+msgid "New attribute"
+msgstr "Новый атрибут"
+
+#: document_processing/constants.py:19
+msgid "Disable"
+msgstr "Выключено"
+
+#: document_processing/constants.py:20
+msgid "Enable"
+msgstr "Включено"
+
+#: document_processing/constants.py:29
+msgid "Public"
+msgstr "Публичный"
+
+#: document_processing/constants.py:30
+msgid "Private"
+msgstr "Приватный"
+
+#: document_processing/constants.py:31 document_processing/constants.py:37
+msgid "Hidden"
+msgstr "Спрятанный"
+
+#: document_processing/constants.py:35
+msgid "Deleted"
+msgstr "Удаленный"
+
+#: document_processing/constants.py:36
+msgid "Active"
+msgstr "Активный"
+
+#: document_processing/constants.py:41
+msgid "Create room"
+msgstr ""
+
+#: document_processing/constants.py:42
+msgid "Buy ticket"
+msgstr ""
+
+#: document_processing/constants.py:43
+msgid "Owner add"
+msgstr ""
+
+#: document_processing/constants.py:44
+msgid "Free access"
+msgstr ""

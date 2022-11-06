@@ -1,0 +1,131 @@
+{% extends "document/base_document.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load i18n %}
+
+{% block page_title %}
+
+{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard_url' %}">{% trans "Dashboard" %}</a></li>
+        <li class="breadcrumb-item active">{% trans "Document upload" %}</li>
+    </ol>
+{% endblock %}
+
+{% block style %}
+    <style>
+        .lds-dual-ring {
+            display: none;
+            width: 80px;
+            height: 80px;
+        }
+
+        .lds-dual-ring:after {
+            content: " ";
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border-radius: 50%;
+            border: 6px solid #cef;
+            border-color: #cef transparent #cef transparent;
+            animation: lds-dual-ring 1.2s linear infinite;
+        }
+
+        @keyframes lds-dual-ring {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+{% endblock %}
+
+{% block content %}
+
+
+
+    <!--
+    <form enctype="multipart/form-data" action="http://89.223.95.49:8887/upload" method="post">
+          <input type="file" name="files" multiple />
+          <input type="submit" value="upload" />
+    </form>
+    -->
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{% trans "Document upload form" %}</h3>
+
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div id="add_loading_icon" class="lds-dual-ring " style="position: absolute; z-index: 1000"></div>
+
+                </div>
+                <div class="col-md-6">
+                    <form enctype="multipart/form-data" action="" method="post" onsubmit="showLoadingIcon();">
+                        {% csrf_token %}
+
+                        {{ form|crispy }}
+
+
+                        <div class="form-group">
+                            <label for="files">{% trans "Upload documents" %}</label>
+                            <input type="file" id="files" name="files" class="form-control-file" required multiple>
+
+                            <label for="category" class="mt-2">{% trans "Category" %}</label>
+                            <select name="category" id="category" class="form-control">
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}">{{ category.title }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <label for="description" class="mt-2">{% trans "Description" %}</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+
+                            <input type="submit" class="form-control mt-2 btn btn-primary" id="upload" name="upload"
+                                   value="{% trans "Upload" %}">
+                        </div>
+
+
+                    </form>
+
+                </div>
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.card-body -->
+
+        <!-- /.footer -->
+    </div>
+    <!-- /.card -->
+
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        function showLoadingIcon() {
+            document.getElementById('add_loading_icon').style.display = "inline-block";
+        }
+    </script>
+
+    <!--
+    <script>
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    </script>
+    -->
+{% endblock %}

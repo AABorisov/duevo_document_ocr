@@ -1,0 +1,25 @@
+.idea/
+media/users/*
+media/csv_files/*
+media/CACHE/*
+media/tmp_pages/*
+media/files/*
+media/profile_pics/*
+static/pdf
+static/pdf_pages
+static_files/
+static/admin/
+media/documents/*
+media/pages/*
+static_root/*
+cron_lock/*
+!media/users/templates
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+.DS_Store
+venv/
+document_processing/settings_local.py
+send_pages_to_server.sh

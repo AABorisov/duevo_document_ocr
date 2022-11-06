@@ -1,0 +1,1023 @@
+{% extends "document/base_document.html" %}
+{% load i18n %}
+{% load static %}
+{% load document_tags %}
+
+{% block page_title %}
+
+{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb float-sm-right">
+        <li class="breadcrumb-item active">{% trans "Dashboard" %}</li>
+    </ol>
+{% endblock %}
+
+
+{% block style %}
+
+    <!--Daterange picker-->
+    <link rel="stylesheet" href="{% static 'css/daterangepicker.css' %}">
+
+    <!--Datatables-->
+    <link rel="stylesheet" href="{% static 'datatables/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'datatables/css/responsive.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Chart.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/select2-bootstrap4.min.css' %}">
+
+
+
+    <style>
+        .fit-image {
+            width: 100%;
+            object-fit: cover;
+            /*height: 300px;  only if you want fixed height */
+        }
+    </style>
+
+{% endblock %}
+
+
+{% block tree_view %}
+
+    {% include "document/includes/tree_view_menu.html" %}
+
+{% endblock %}
+
+
+{% block content %}
+    <div id="photo">
+
+
+        <!--minus 1 row-->
+        <div class="row">
+
+            <div class="col-md-12">
+                <!-- MAP & BOX PANE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Filters" %}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+
+
+                        <form class="form-inline mt-3 mb-3" action="{% url 'dashboard_url' %}" method="post">
+                            {% csrf_token %}
+
+
+                            <!--Select2 filter Doc type-->
+                            <div class="col-md-3 ">
+                                <div class="form-group fo">
+                                    <label>{% trans "Document type" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;"
+                                            name="nlp_document_type"
+                                            id="nlp_document_type">
+                                        <option value="__all__">{% trans "All" %}</option>
+
+                                        {% for nlp_document_type in nlp_document_types %}
+                                            <option value="{{ nlp_document_type.document_type }}" {{ request.session.nlp_document_type|equal_str_with_session:nlp_document_type.document_type }}>{{ nlp_document_type.document_type }}</option>
+
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+                            <!--./Select2 filter Doc type-->
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Number" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;" name="nlp_number"
+                                            id="nlp_number">
+                                        <option value="__all__">{% trans "All" %}</option>
+
+                                        {% for nlp_number in nlp_numbers %}
+                                            <option value="{{ nlp_number.document_number }}" {{ request.session.nlp_number|equal_str_with_session:nlp_number.document_number }}>{{ nlp_number.document_number }}</option>
+
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+                            <div class="col-md-3">
+                                <!-- Date range -->
+                                <div class="form-group" >
+                                    <label for="nlp_date">{% trans "Document date" %}</label>
+
+                                            <div class="col-md-12 input-group pl-0 pr-0">
+                                            <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                            </div>
+                                            <input type="text" class="form-control float-right " id="nlp_date"
+                                                   value="{{ nlp_date }}" placeholder="{% trans "Start - End" %}"
+                                                   name="nlp_date">
+                                        </div>
+                                    <!-- /.input group -->
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Issuing authority" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;" name="nlp_authority"
+                                            id="nlp_authority">
+                                        <option value="__all__">{% trans "All" %}</option>
+                                        {% for nlp_authority in nlp_authorities %}
+
+                                            <option value="{{ nlp_authority.issuing_authority }}" {{ request.session.nlp_authority|equal_str_with_session:nlp_authority.issuing_authority }}>{{ nlp_authority.issuing_authority }}</option>
+
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Customer" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;" name="nlp_customer"
+                                            id="nlp_customer">
+                                        <option value="__all__">{% trans "All" %}</option>
+                                        {% for nlp_customer in nlp_customers %}
+                                            <option value="{{ nlp_customer.customer }}"  {{ request.session.nlp_customer|equal_str_with_session:nlp_customer.customer }}>{{ nlp_customer.customer }}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Builder" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;" name="nlp_builder"
+                                            id="nlp_builder">
+                                        <option value="__all__">{% trans "All" %}</option>
+                                        {% for nlp_builder in nlp_builders %}
+                                            <option value="{{ nlp_builder.builder }}"  {{ request.session.nlp_builder|equal_str_with_session:nlp_builder.builder }}>{{ nlp_builder.builder }}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Project organization" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;"
+                                            name="nlp_project_organization"
+                                            id="nlp_project_organization">
+                                        <option value="__all__">{% trans "All" %}</option>
+                                        {% for nlp_project_organization in nlp_project_organizations %}
+                                            <option value="{{ nlp_project_organization.project_organization }}"  {{ request.session.nlp_project_organization|equal_str_with_session:nlp_project_organization.project_organization }}>{{ nlp_project_organization.project_organization }}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Project author manager" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;"
+                                            name="nlp_project_author_manager"
+                                            id="nlp_project_organization">
+                                        <option value="__all__">{% trans "All" %}</option>
+                                        {% for nlp_project_author_manager in nlp_project_author_managers %}
+                                            <option value="{{ nlp_project_author_manager.project_author_manager }}"  {{ request.session.nlp_project_author_manager|equal_str_with_session:nlp_project_author_manager.project_author_manager }}>{{ nlp_project_author_manager.project_author_manager }}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>{% trans "Cadastral number" %}</label>
+                                    <select class="form-control select2bs4" style="width: 100%;"
+                                            name="nlp_cadastral_number"
+                                            id="nlp_cadastral_number">
+                                        <option value="__all__">{% trans "All" %}</option>
+                                        {% for nlp_cadastral_number in nlp_cadastral_numbers %}
+                                            <option value="{{ nlp_cadastral_number.cadastral_number }}"  {{ request.session.nlp_cadastral_number|equal_str_with_session:nlp_cadastral_number.cadastral_number }}>{{ nlp_cadastral_number.cadastral_number }}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                                <!-- /.form-group -->
+                            </div>
+
+
+                            <div class="col-md-12 mt-3">
+
+                                <button type="submit" class="btn btn-primary"
+                                        value="search_nlp">{% trans "Search" %}</button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+        </div>
+
+        <!--./minus 1 row row-->
+
+
+        <!--Zero row-->
+        <div class="row">
+
+            <div class="col-md-12">
+                <!-- MAP & BOX PANE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Recognized data" %}</h3>
+
+                        <div class="card-tools">
+                            <a href="{% url 'convert_nlp_table_to_nlp_result_url' %}" class="btn btn-tool btn-sm">
+                                <i class="fas fa-sync"></i>
+                            </a>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+
+
+                        <div class="col-md-12 mt-3">
+
+                            <a href="{% url 'generate_csv_url' %}" class="btn btn-info">{% trans "CSV report" %}</a>
+                            <a href="{% url 'generate_xml_url' %}" class="btn btn-info">{% trans "XML report" %}</a>
+                            <button onclick="takeshot()" class="btn btn-info">{% trans "Screenshoot" %}</button>
+
+                        </div>
+
+                        <div class="col-md-12 mb-2 mt-3">
+                            <table id="nlp_table"
+                                   class="table table-striped table-bordered dt-responsive nowrap table-hover"
+                                   style="width:100%">
+                                <thead>
+
+                                <tr>
+                                    <th>{% trans "ID" %}</th>
+                                    <th>{% trans "Document name" %}</th>
+                                    <th>{% trans "Document type" %}</th>
+                                    <th>{% trans "Number" %}</th>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Issuing authority" %}</th>
+                                    <th>{% trans "Cadastral number" %}</th>
+                                    <th>{% trans "Administrative district" %}</th>
+                                    <th>{% trans "District" %}</th>
+                                    <th>{% trans "Address" %}</th>
+                                    <th>{% trans "Object name" %}</th>
+                                    <th>{% trans "Customer" %}</th>
+                                    <th>{% trans "Builder" %}</th>
+                                    <th>{% trans "Project organization" %}</th>
+                                    <th>{% trans "Project author manager" %}</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+        </div>
+        <!--./Zero row-->
+
+        <!--First row-->
+        <div class="row">
+
+            <div class="col-md-7">
+                <!-- MAP & BOX PANE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Uploaded documents" %}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+
+                        <div class="col-md-12 mb-2 mt-3">
+                            <table id="doc_table"
+                                   class="table table-striped table-bordered dt-responsive nowrap table-hover"
+                                   style="width:100%">
+                                <thead>
+
+                                <tr>
+                                    <th>{% trans "ID" %}</th>
+                                    <th>{% trans "File name" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Document type" %}</th>
+                                    <th>{% trans "Created at" %}</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+            <div class="col-md-5">
+                <!-- MAP & BOX PANE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Uploaded files" %}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+
+                        <div class="col-md-12 mb-2 mt-3">
+                            <table id="file_table"
+                                   class="table table-striped table-bordered dt-responsive nowrap table-hover"
+                                   style="width:100%">
+                                <thead>
+
+                                <tr>
+                                    <th>{% trans "ID" %}</th>
+                                    <th>{% trans "File name" %}</th>
+                                    <th>{% trans "Processed" %}</th>
+                                    <th>{% trans "Uploaded by" %}</th>
+                                    <th>{% trans "Created at" %}</th>
+                                    <th>{% trans "Category" %}</th>
+
+
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+        </div>
+        <!--./First row-->
+
+        <!-- Second row -->
+
+        <div class="row">
+
+            <!--Donut Chart-->
+            <div class="col-md-6">
+                <!-- MAP & BOX PANE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Summary of statuses" %}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+
+                        <canvas id="donutChart" style="height:350px; min-height:350px"></canvas>
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--./Donut Chart-->
+
+            <!--Stacked Bar Chart-->
+            <div class="col-md-6">
+                <!-- MAP & BOX PANE -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Summary of statuses by date" %}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+
+                        <canvas id="stackedBarChart" style="height:350px; min-height:350px"></canvas>
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--./Stacked Bar Chart-->
+
+        </div>
+        <!-- ./Second row -->
+
+        <!-- Third row -->
+    <!--
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{% trans "Map" %}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
+                                    class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove"><i
+                                    class="fas fa-times"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="maximize"><i
+                                    class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="col-md-12">
+                            <div id="map" style="height: 400px"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        -->
+        <!-- Third row -->
+
+        <!-- Fourth row -->
+        <div class="row">
+            <div id="output" class="fit-image img-responsive" style="display: none"></div>
+        </div>
+        <!-- Fourth row -->
+
+
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+
+    <!--Datatables-->
+
+    <script type="text/javascript" src="{% static 'datatables/js/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'datatables/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'datatables/js/dataTables.responsive.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'datatables/js/dataTables.select.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'datatables/js/responsive.bootstrap4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+    <!-- Select2 -->
+    <script src="{% static 'js/select2.full.min.js' %}"></script>
+    <script src="{% static 'js/select2.full.min.js' %}"></script>
+
+    <!--Daterange picker-->
+    <script type="text/javascript" src="{% static 'js/moment.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/daterangepicker.js' %}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+
+    <script>
+        jQuery('.select2bs4').select2({
+            theme: 'bootstrap4'
+        });
+    </script>
+
+    <script>
+        //Date range picker
+        $('#nlp_date').daterangepicker({
+            "showDropdowns": true,
+            "autoUpdateInput": false,
+            "locale": {
+                "format": "YYYY-MM-DD",
+                "separator": " - ",
+                "applyLabel": "Применить",
+                "cancelLabel": "Очистить",
+                "fromLabel": "От",
+                "toLabel": "До",
+                "customRangeLabel": "Custom",
+                "daysOfWeek": [
+                    "Вс",
+                    "Пн",
+                    "Вт",
+                    "Ср",
+                    "Чт",
+                    "Пт",
+                    "Сб"
+                ],
+                "monthNames": [
+                    "Январь", // заменяем на Январь
+                    "Февраль", // Февраль и т д
+                    "Март",
+                    "Апрель",
+                    "Май",
+                    "Июнь",
+                    "Июль",
+                    "Август",
+                    "Сентябрь",
+                    "Октябрь",
+                    "Ноябрь",
+                    "Декабрь"
+                ],
+                "firstDay": 1
+            }
+        }, function (start, end, label) {
+            console.log('New date range selected: ' + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD') + ' (predefined range: ' + label + ')');
+        });
+
+        $('#nlp_date').on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        });
+
+        $('#nlp_date').on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+        });
+
+    </script>
+
+    <script>
+        // Define the function
+        // to screenshot the div
+        function takeshot() {
+            html2canvas($('#photo')[0], {
+                scale: 3
+            }).then(function (canvas) {
+                let a = document.createElement('a');
+                a.href = canvas.toDataURL("image/png");
+                a.download = 'dashboard.png';
+                a.click();
+            });
+        }
+    </script>
+
+    <!--Yandex map-->
+{#    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&amp;apikey=36cd86e6-7a95-48e3-9f04-ff4fdb8826eb#}
+{#" type="text/javascript"></script>#}
+
+{#    <script type="text/javascript">#}
+{#        // Функция ymaps.ready() будет вызвана, когда#}
+{#        // загрузятся все компоненты API, а также когда будет готово DOM-дерево.#}
+{#        ymaps.ready(init);#}
+{##}
+{#        function init() {#}
+            {#let json_data = jQuery.parseJSON('{{ json_bad_poles|safe }}');#}
+            {#console.log(json_data)#}
+{##}
+{#            var myMap = new ymaps.Map('map', {#}
+{#                    center: [55.7522, 37.6156],#}
+{#                    zoom: 10#}
+{#                }, {#}
+{#                    searchControlProvider: 'yandex#search'#}
+{#                }),#}
+{#                objectManager = new ymaps.ObjectManager({#}
+{#                    // Чтобы метки начали кластеризоваться, выставляем опцию.#}
+{#                    clusterize: true,#}
+{#                    // ObjectManager принимает те же опции, что и кластеризатор.#}
+{#                    gridSize: 32,#}
+{#                    clusterDisableClickZoom: true#}
+{#                });#}
+{##}
+{#            // Чтобы задать опции одиночным объектам и кластерам,#}
+{#            // обратимся к дочерним коллекциям ObjectManager.#}
+{#            objectManager.objects.options.set('preset', 'islands#redDotIcon');#}
+{#            objectManager.clusters.options.set('preset', 'islands#redClusterIcons');#}
+{#            myMap.geoObjects.add(objectManager);#}
+            {#objectManager.add(json_data)#}
+{##}
+{##}
+{#        }#}
+{##}
+{#    </script>#}
+
+    <!--Projects table-->
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+
+            {% get_current_language as LANGUAGE_CODE %}
+            const lang_code = '{{ LANGUAGE_CODE }}';
+
+            let nlp_table = $('#nlp_table').DataTable({
+                "processing": true,
+                "stateSave": true,
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    {
+                        "targets": 1,
+                        "visible": true,
+
+                        "render": function (data, type, row) {
+                            const id = row.document_id;
+                            const title = row.document__file__original_name;
+                            const is_detail = row.document__status__is_detail;
+                            const download_file = '{% trans "Document detail" %}'
+                            const url = "{% url 'document_detail_url' document_id=7770001 page_id=0 %}".replace(7770001, id);
+                            if (is_detail == 1) {
+                                return '<a class="table-edit" data-id="" href="' + url + '" title="' + download_file + '">' + title + '</a>';
+                            } else {
+                                return title;
+                            }
+
+                        }
+                    },
+                    {
+                        "targets": '_all',
+                        "createdCell": function (td, cellData, rowData, row, col) {
+                            const color = rowData['document__status__color'];
+                            $(td).css({
+                                'background': color,
+                                'font-weight': 500,
+                            })
+                        },
+                    }
+                ],
+                "ajax": {
+                    "processing": true,
+                    "url": "{% url 'nlp_json_url' %}",
+                    "dataSrc": ""
+                },
+
+                "language": {
+
+                    {% if LANGUAGE_CODE == 'en' %}
+                        "url": "{% static 'datatables_languages/en.json' %}"
+                    {% else %}
+                        "url": "{% static 'datatables_languages/ru.json' %}"
+                    {% endif %}
+                },
+
+                "aoColumns": [
+                    {"data": "document_id"},
+                    {"data": "document__file__original_name"},
+                    {"data": "document_type"},
+                    {"data": "document_number"},
+                    {"data": "document_date"},
+                    {"data": "issuing_authority"},
+                    {"data": "cadastral_number"},
+                    {"data": "administrative_district"},
+                    {"data": "district"},
+                    {"data": "address"},
+                    {"data": "object_name"},
+                    {"data": "customer"},
+                    {"data": "builder"},
+                    {"data": "project_organization"},
+                    {"data": "project_author_manager"},
+
+                ]
+            });
+
+
+            let doc_table = $('#doc_table').DataTable({
+                "processing": true,
+                "stateSave": true,
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    {
+                        "targets": 1,
+                        "visible": true,
+
+                        "render":
+
+                            function (data, type, row) {
+                                const id = row.id;
+                                const title = row.file__original_name;
+                                const status = row.status__id;
+                                const is_detail = row.status__is_detail;
+                                const download_file = '{% trans "Document detail" %}'
+                                const url = "{% url 'document_detail_url' document_id=7770001 page_id=0 %}".replace(7770001, id);
+                                if (is_detail == 1) {
+                                    return '<a class="table-edit" data-id="" href="' + url + '" title="' + download_file + '">' + title + '</a>';
+                                } else {
+                                    return title;
+                                }
+
+                            }
+                    },
+                    {
+                        "targets": '_all',
+                        "createdCell": function (td, cellData, rowData, row, col) {
+                            const color = rowData['status__color'];
+                            $(td).css({
+                                'background': color,
+                                'font-weight': 500,
+                            })
+                        },
+                    }
+                ],
+                "ajax": {
+                    "processing": true,
+                    "url": "{% url 'document_json_url' %}",
+                    "dataSrc": ""
+                },
+
+                "language": {
+
+                    {% if LANGUAGE_CODE == 'en' %}
+                        "url": "{% static 'datatables_languages/en.json' %}"
+                    {% else %}
+                        "url": "{% static 'datatables_languages/ru.json' %}"
+                    {% endif %}
+                },
+
+                "aoColumns": [
+                    {"data": "id"},
+                    {"data": "file__original_name"},
+                    {"data": "status__title"},
+                    {"data": "tesseractclassifier__document_type__doc_type_name"},
+                    {"data": "created_at"},
+
+                ]
+            });
+
+            let file_table = $('#file_table').DataTable({
+                "processing": true,
+                "stateSave": true,
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    {
+                        "targets": 1,
+                        "visible": true,
+
+                        "render":
+                            {#'id', 'original_name', 'category__title', 'user__email', 'is_processed'#}
+                            function (data, type, row) {
+                                const id = row.id;
+                                const title = row.original_name;
+                                const is_processed = row.is_processed;
+                                const download_file = '{% trans "File download" %}'
+                                const url = "{% url 'file_download_url' file_id=7770001 %}".replace(7770001, id);
+                                if (is_processed == 1) {
+                                    return '<a class="table-edit" data-id="" href="' + url + '" title="' + download_file + '">' + title + '</a>';
+                                } else {
+                                    return title;
+                                }
+                            }
+                    },
+                    {
+                        "targets": 2,
+                        "visible": true,
+                        "createdCell": function (td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'text-align': 'center',
+                            })
+                        },
+
+                        "render":
+                            {#'id', 'original_name', 'category__title', 'user__email', 'is_processed'#}
+                            function (data, type, row) {
+                                const is_processed = row.is_processed;
+                                if (is_processed == 0) {
+                                    return '<div class="fa-1x text-gray" ><i class="fas fa-sync fa-spin"></i></div>';
+                                } else {
+                                    return '<i class="fas fa-check text-green" ></i>';
+                                }
+
+                            }
+                    },
+                    /*
+                    {
+                        "targets": '_all',
+                        "createdCell": function (td, cellData, rowData, row, col) {
+                            const color = rowData['status__color'];
+                            $(td).css({
+                                'background': color,
+                                'font-weight': 500,
+                            })
+                        },
+                    }
+                    */
+                ],
+                "ajax": {
+                    "processing": true,
+                    "url": "{% url 'ajax_file_table_json_url' %}",
+                    "dataSrc": ""
+                },
+
+                "language": {
+
+                    {% if LANGUAGE_CODE == 'en' %}
+                        "url": "{% static 'datatables_languages/en.json' %}"
+                    {% else %}
+                        "url": "{% static 'datatables_languages/ru.json' %}"
+                    {% endif %}
+                },
+
+                "aoColumns": [
+                    {"data": "id"},
+                    {"data": "original_name"},
+                    {"data": "is_processed"},
+                    {"data": "user__email"},
+                    {"data": "created_at"},
+                    {"data": "category__title"},
+
+
+                ]
+            });
+
+            setInterval(function () {
+                doc_table.ajax.reload(null, false); // user paging is not reset on reload
+                file_table.ajax.reload(null, false); // user paging is not reset on reload
+                nlp_table.ajax.reload(null, false); // user paging is not reset on reload
+            }, 50000);
+
+        });
+
+
+    </script>
+    <!--/.Projects table-->
+
+    <!--Donut Charts-->
+    <script>
+
+        const endpointDonut = '{% url 'donut_chart_json_url' %}'
+        let labelsDonut = {{ json_donut_labels|safe }};
+        let datasetsDonut = {{ json_donut_datasets|safe }};
+
+        let donutDataDB = {
+            labels: labelsDonut,
+            datasets: datasetsDonut
+        }
+
+        // Get context with jQuery - using jQuery's .get() method.
+        let donutChartCanvas = $('#donutChart').get(0).getContext('2d')
+        let donutData = donutDataDB
+        let donutOptions = {
+            maintainAspectRatio: false,
+            responsive: true,
+        }
+        //Create pie or douhnut chart
+        // You can switch between pie and douhnut using the method below.
+        let donutChart = new Chart(donutChartCanvas, {
+            type: 'doughnut',
+            data: donutData,
+            options: donutOptions
+        })
+
+        setInterval(function () {
+            $.ajax({
+                method: "GET",
+                url: endpointDonut,
+                success: function (data) {
+                    labelsDonut = JSON.parse(data.labels)
+                    datasetsDonut = JSON.parse(data.datasets)
+
+                    console.log(labelsDonut)
+                    console.log(datasetsDonut)
+
+                    donutChart.data.datasets = datasetsDonut;
+                    donutChart.data.labels = labelsDonut;
+                    donutChart.update();
+
+                },
+                error: function (error_data) {
+                    console.log('Error')
+                    console.log(error_data)
+                }
+            })
+        }, 60000)
+
+
+    </script>
+    <!--/.Donut Charts-->
+
+
+    <!--Stacked Charts-->
+    <script>
+
+        const endpoint = '{% url 'stacked_chart_json_url' %}'
+        let labels = {{ json_labels|safe }};
+        let datasets = {{ json_datasets|safe }};
+
+        let barChartDataDB = {
+            labels: labels,
+            datasets: datasets
+        }
+
+        //---------------------
+        //- STACKED BAR CHART -
+        //---------------------
+        let stackedBarChartCanvas = $('#stackedBarChart').get(0).getContext('2d')
+        {#let stackedBarChartData = jQuery.extend(true, {}, barChartData)#}
+
+        let stackedBarChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    stacked: true,
+                }],
+                yAxes: [{
+                    stacked: true
+                }]
+            }
+        }
+
+        let stackedBarChart = new Chart(stackedBarChartCanvas, {
+            type: 'bar',
+            data: barChartDataDB,
+            options: stackedBarChartOptions
+        })
+
+        setInterval(function () {
+            $.ajax({
+                method: "GET",
+                url: endpoint,
+                success: function (data) {
+                    labels = JSON.parse(data.labels)
+                    datasets = JSON.parse(data.datasets)
+
+                    console.log(labels)
+                    console.log(datasets)
+
+                    stackedBarChart.data.datasets = datasets;
+                    stackedBarChart.data.labels = labels;
+                    stackedBarChart.update();
+
+                },
+                error: function (error_data) {
+                    console.log('Error')
+                    console.log(error_data)
+                }
+            })
+        }, 50000)
+
+    </script>
+    <!--/.Stacked Charts-->
+
+{% endblock %}

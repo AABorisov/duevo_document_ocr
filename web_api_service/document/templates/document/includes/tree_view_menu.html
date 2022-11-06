@@ -1,0 +1,62 @@
+{% load i18n %}
+{% load static %}
+{% load document_tags %}
+
+<li class="nav-header">{% trans "DOCUMENTS" %}</li>
+
+{% for tree_dict in tree_view %}
+        {% if tree_dict.doc_class_documents %}
+            <li class="nav-item has-treeview {% if tree_dict.doc_class_id == request.session.tree_class_id %} menu-open {% endif %}">
+
+
+            <!--first level-->
+            <a href="#" class="nav-link {% if tree_dict.doc_class_id == request.session.tree_class_id %} active {% endif %}">
+                <i class="nav-icon fas {% if tree_dict.doc_class_id == request.session.tree_class_id %} fa-folder-open {% else %} fa-folder-minus {% endif %}"></i>
+                <p>
+                    {{ tree_dict.doc_class_name|truncatechars:20 }}
+                    <i class="right fas fa-angle-left"></i>
+                </p>
+            </a>
+            <!--/.first level-->
+
+            <ul class="nav nav-treeview">
+
+
+                {% for doc_class_document in tree_dict.doc_class_documents %}
+
+                    <!--second level-->
+                    <li class="nav-item has-treeview {% if doc_class_document.document_id == request.session.tree_doc_id %} menu-open {% endif %}">
+                        <a href="#" class="nav-link {% if doc_class_document.document_id == request.session.tree_doc_id %} active {% endif %}">
+                            <i class="far fa-images nav-icon"></i>
+                            <p title="{{ doc_class_document.document_title }}">
+                                {{ doc_class_document.document_title|truncatechars:15 }}
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+
+                            <!--Third level-->
+                            {% for document_page in doc_class_document.document_pages %}
+                                <li class="nav-item">
+                                    <a href="{% url 'document_detail_url' doc_class_document.document_id document_page.page_id %}" class="nav-link {% if document_page.page_id == request.session.tree_page_id %} active {% endif %}">
+                                        <i class="far fa-file-image nav-icon"></i>
+                                        <p>{% trans "Page" %} {{ document_page.page_number }}</p>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            <!--/.Third level-->
+
+                        </ul>
+                    </li>
+                    <!--/.second level-->
+
+                {% endfor %}
+
+            </ul>
+
+
+        </li>
+
+        {% endif %}
+
+    {% endfor %}

@@ -1,0 +1,34 @@
+{
+  "document_id": 5,
+  "doc_class_id": 5,
+  "doc_class_name": "Свид. АГР",
+  "nlp_table": [
+    {
+      "nlp_id": 2,
+      "attribute_id": 53,
+      "attribute_name": "Номер",
+      "attribute_category_id": null,
+      "attribute_category_name": null,
+      "ocr_word_ids": null,
+      "status": 0
+    },
+    {
+      "nlp_id": 3,
+      "attribute_id": 54,
+      "attribute_name": "Дата",
+      "attribute_category_id": null,
+      "attribute_category_name": null,
+      "ocr_word_ids": [9, 10],
+      "status": 1
+    },
+    {
+      "nlp_id": 4,
+      "attribute_id": 55,
+      "attribute_name": "Выдавший орган",
+      "attribute_category_id": null,
+      "attribute_category_name": null,
+      "ocr_word_ids": [11, 12, 13],
+      "status": 1
+    }
+  ]
+}
